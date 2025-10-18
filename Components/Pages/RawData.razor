@@ -1,0 +1,65 @@
+@page "/rawData"
+@using spaceTracker.Models
+@using spaceTracker.Server.Services
+@inject weatherService weatherService
+@inject RocketLaunchLiveService rocketLaunchService
+
+<PageTitle>Raw Data For APIs</PageTitle>
+
+<h1>Weather Data (Boston, Ma)</h1>
+
+@if (weatherData != null)
+{
+    <p>Temperature: @weatherData.Current?.Temperature_2m °C</p>
+    <p>Wind Speed: @weatherData.Current?.WindSpeed_10m km/h</p>
+    <p>Time: @weatherData.Current?.Time UTC</p>
+}
+else
+{
+    <p>Loading weather data...</p>
+}
+
+<h1>Upcoming Rocket Launches</h1>
+
+@if (rocketData != null && rocketData.Any())
+{
+    <ul>
+        @foreach (var launch in rocketData)
+        {
+            <li>
+                <strong>Mission:</strong> @launch.Name<br />
+                <strong>Provider:</strong> @(launch.Provider?.Name ?? "Unknown")<br />
+                <strong>Launch Time:</strong> @(launch.Win_open?.ToString("u") ?? launch.T0?.ToString("u"))<br />
+                <strong>Pad:</strong> @(launch.Pad?.Name ?? "Unknown")<br />
+                <strong>Vehicle:</strong> @(launch.Vehicle?.Name ?? "Unknown")<br />
+                <strong>Pad Location:</strong> 
+                @(launch.Pad?.Location?.Name ?? "Unknown"), 
+                @(launch.Pad?.Location?.Country ?? "Unknown")<br />
+                <strong>Description:</strong> @(launch.LaunchDescription ?? "No description available")
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>Loading rocket launch data...</p>
+}
+
+@code {
+    private weatherResponse? weatherData;
+    private List<RocketLaunchItem>? rocketData;
+
+    protected override async Task OnInitializedAsync()
+    {
+        double latitude = 42.3601;
+        double longitude = -71.0589;
+
+        var weatherTask = weatherService.GetWeatherData(latitude, longitude);
+        var rocketTask = rocketLaunchService.GetUpcomingLaunches();
+
+        await Task.WhenAll(weatherTask, rocketTask);
+
+        weatherData = await weatherTask;
+        rocketData = await rocketTask;
+    }
+}
