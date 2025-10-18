@@ -1,5 +1,5 @@
 using spaceTracker.Components;
-using spaceTracker.Server.Services; // <-- your WeatherService namespace
+using spaceTracker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +16,9 @@ builder.Services.AddHttpClient<RocketLaunchLiveService>();
 
 builder.Services.AddScoped<n2yoService>();
 builder.Services.AddHttpClient<n2yoService>();
+
+builder.Services.AddScoped<SpaceDevsService>();
+builder.Services.AddHttpClient<SpaceDevsService>();
 
 var app = builder.Build();
 

@@ -1,9 +1,10 @@
 @page "/rawData"
 @using spaceTracker.Models
-@using spaceTracker.Server.Services
+@using spaceTracker.Services
 @inject weatherService weatherService
 @inject RocketLaunchLiveService rocketLaunchService
 @inject n2yoService n2yoService
+@inject SpaceDevsService spaceDevsService
 
 <PageTitle>Raw Data For APIs</PageTitle>
 
@@ -194,6 +195,10 @@ else
     <p>Loading Hubble data...</p>
 }
 
+<h1>SpaceDevs API Test Results</h1>
+
+
+
 @code {
     private weatherResponse? weatherData;
     private List<RocketLaunchItem>? rocketData;
@@ -242,4 +247,8 @@ else
         var index = (int)Math.Round(azimuth / 22.5) % 16;
         return directions[index];
     }
+
+    
+
+    
 }

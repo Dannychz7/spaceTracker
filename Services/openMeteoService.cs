@@ -2,7 +2,7 @@ using spaceTracker.Models;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace spaceTracker.Server.Services;
+namespace spaceTracker.Services;
 
 public class weatherService
 {
