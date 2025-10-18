@@ -3,10 +3,11 @@
 @using spaceTracker.Server.Services
 @inject weatherService weatherService
 @inject RocketLaunchLiveService rocketLaunchService
+@inject n2yoService n2yoService
 
 <PageTitle>Raw Data For APIs</PageTitle>
 
-<h1>Weather Data (Boston, Ma)</h1>
+<h1>Weather Data (Boston, MA)</h1>
 
 @if (weatherData != null)
 {
@@ -45,21 +46,200 @@ else
     <p>Loading rocket launch data...</p>
 }
 
+<h1>Fun Satellite Information</h1>
+
+@if (issPosition != null)
+{
+    <h3> International Space Station (ISS)</h3>
+    <p><strong>Current Location:</strong> @issPosition.Positions?.FirstOrDefault()?.Satlatitude.ToString("F2")°, @issPosition.Positions?.FirstOrDefault()?.Satlongitude.ToString("F2")°</p>
+    <p><strong>Altitude:</strong> @issPosition.Positions?.FirstOrDefault()?.Sataltitude.ToString("F2") km above Earth</p>
+    <p><strong>Your View:</strong> 
+        @if (issPosition.Positions?.FirstOrDefault()?.Elevation > 0)
+        {
+            <span style="color: green;">Visible! Look @GetCompassDirection(issPosition.Positions.FirstOrDefault()?.Azimuth ?? 0) at @issPosition.Positions?.FirstOrDefault()?.Elevation.ToString("F1")° elevation 🌟</span>
+        }
+        else
+        {
+            <span>Below horizon (@issPosition.Positions?.FirstOrDefault()?.Elevation.ToString("F1")°)</span>
+        }
+    </p>
+    <p><strong>Right Ascension:</strong> @issPosition.Positions?.FirstOrDefault()?.Ra.ToString("F2")° | <strong>Declination:</strong> @issPosition.Positions?.FirstOrDefault()?.Dec.ToString("F2")°</p>
+}
+else
+{
+    <p>Loading ISS data...</p>
+}
+
+@if (satellitesAbove != null && satellitesAbove.Above != null)
+{
+    <h3> Satellites Currently Overhead (Worcester, MA)</h3>
+    <p><strong>Count:</strong> @satellitesAbove.Above.Count satellite(s) visible in the sky right now!</p>
+    <ul>
+        @foreach (var sat in satellitesAbove.Above.Take(10))
+        {
+            <li>
+                <strong>@sat.Satname</strong> (ID: @sat.Satid)<br />
+                Altitude: @sat.Satalt.ToString("F1") km | 
+                Position: @sat.Satlat.ToString("F2")°, @sat.Satlng.ToString("F2")° | 
+                Launched: @sat.Launchdate | 
+                Designator: @sat.Intdesignator
+            </li>
+        }
+    </ul>
+    @if (satellitesAbove.Above.Count > 10)
+    {
+        <p><em>...and @(satellitesAbove.Above.Count - 10) more!</em></p>
+    }
+}
+else
+{
+    <p>Loading overhead satellites...</p>
+}
+
+@if (issVisualPasses != null && issVisualPasses.Passes != null && issVisualPasses.Passes.Any())
+{
+    <h3> Next ISS Visual Sighting Opportunities</h3>
+    <p>When you can see the ISS with your naked eye from Worcester, MA:</p>
+    <ul>
+        @foreach (var pass in issVisualPasses.Passes.Take(3))
+        {
+            var startTime = DateTimeOffset.FromUnixTimeSeconds(pass.StartUTC).ToLocalTime();
+            var maxTime = DateTimeOffset.FromUnixTimeSeconds(pass.MaxUTC).ToLocalTime();
+            var endTime = DateTimeOffset.FromUnixTimeSeconds(pass.EndUTC).ToLocalTime();
+            var duration = pass.Duration / 60;
+            <li>
+                <strong>@startTime.ToString("ddd, MMM dd @ h:mm tt")</strong><br />
+                Duration: @duration min @(duration > 5 ? "" : "") | 
+                Max Elevation: @pass.MaxEl.ToString("F1")° @(pass.MaxEl > 60 ? "(Excellent!)" : pass.MaxEl > 30 ? "(Good)" : "")<br />
+                Brightness: @pass.Mag magnitude (brighter = more negative)<br />
+                <strong>Path:</strong> Rise @pass.StartAzCompass (@pass.StartAz.ToString("F1")°) → 
+                Peak @pass.MaxAzCompass (@pass.MaxAz.ToString("F1")°) → 
+                Set @pass.EndAzCompass (@pass.EndAz.ToString("F1")°)<br />
+                <strong>Times:</strong> Start: @startTime.ToString("h:mm:ss tt") | Peak: @maxTime.ToString("h:mm:ss tt") | End: @endTime.ToString("h:mm:ss tt")
+            </li>
+        }
+    </ul>
+}
+else if (issVisualPasses != null)
+{
+    <p>No visible ISS passes in the next 10 days </p>
+}
+else
+{
+    <p>Loading ISS sighting times...</p>
+}
+
+@if (issRadioPasses != null && issRadioPasses.Passes != null && issRadioPasses.Passes.Any())
+{
+    <h3> ISS Radio Communication Windows</h3>
+    <p>Amateur radio operators can contact the ISS during these times:</p>
+    <ul>
+        @foreach (var pass in issRadioPasses.Passes.Take(3))
+        {
+            var startTime = DateTimeOffset.FromUnixTimeSeconds(pass.StartUTC).ToLocalTime();
+            var maxTime = DateTimeOffset.FromUnixTimeSeconds(pass.MaxUTC).ToLocalTime();
+            var endTime = DateTimeOffset.FromUnixTimeSeconds(pass.EndUTC).ToLocalTime();
+            <li>
+                <strong>@startTime.ToString("ddd, MMM dd @ h:mm tt")</strong><br />
+                Max Elevation: @pass.MaxEl.ToString("F1")° @(pass.MaxEl > 45 ? "(Great signal!)" : "")<br />
+                <strong>Path:</strong> @pass.StartAzCompass (@pass.StartAz.ToString("F1")°) → 
+                @pass.MaxAzCompass (@pass.MaxAz.ToString("F1")°) → 
+                @pass.EndAzCompass (@pass.EndAz.ToString("F1")°)<br />
+                Window: @startTime.ToString("h:mm tt") to @endTime.ToString("h:mm tt")
+            </li>
+        }
+    </ul>
+    <p><em>ISS Ham Radio: Downlink 145.800 MHz | Uplink 144.490 MHz</em></p>
+}
+else
+{
+    <p>Loading radio passes...</p>
+}
+
+@if (issTLE != null)
+{
+    <h3> ISS Orbital Elements (TLE Data)</h3>
+    <p><strong>Satellite:</strong> @issTLE.Info?.Satname (ID: @issTLE.Info?.Satid)</p>
+    <p><strong>TLE Data:</strong></p>
+    <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;">@issTLE.Tle</pre>
+    @if (!string.IsNullOrEmpty(issTLE.Tle))
+    {
+        var lines = issTLE.Tle.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        if (lines.Length >= 2)
+        {
+            <p><strong>Quick Stats from TLE:</strong></p>
+            <ul>
+                <li>Epoch Year/Day: @lines[0].Substring(18, 14) (when this data was calculated)</li>
+                <li>Inclination: @lines[1].Substring(8, 8).Trim()° (orbit angle to equator)</li>
+                <li>Eccentricity: 0.@lines[1].Substring(26, 7) (how circular the orbit is)</li>
+                <li>Mean Motion: @lines[1].Substring(52, 11).Trim() revolutions/day (how many times it orbits Earth daily)</li>
+            </ul>
+        }
+    }
+}
+else
+{
+    <p>Loading TLE data...</p>
+}
+
+@if (hubblePosition != null)
+{
+    <h3> Hubble Space Telescope</h3>
+    <p><strong>Location:</strong> @hubblePosition.Positions?.FirstOrDefault()?.Satlatitude.ToString("F2")°, @hubblePosition.Positions?.FirstOrDefault()?.Satlongitude.ToString("F2")°</p>
+    <p><strong>Altitude:</strong> @hubblePosition.Positions?.FirstOrDefault()?.Sataltitude.ToString("F2") km (orbiting since April 1990!)</p>
+    <p><strong>Elevation from you:</strong> @hubblePosition.Positions?.FirstOrDefault()?.Elevation.ToString("F1")° | <strong>Azimuth:</strong> @GetCompassDirection(hubblePosition.Positions?.FirstOrDefault()?.Azimuth ?? 0)</p>
+}
+else
+{
+    <p>Loading Hubble data...</p>
+}
+
 @code {
     private weatherResponse? weatherData;
     private List<RocketLaunchItem>? rocketData;
+    private SatellitePosition? issPosition;
+    private SatellitePosition? hubblePosition;
+    private SatellitesAboveResponse? satellitesAbove;
+    private VisualPassesResponse? issVisualPasses;
+    private RadioPassesResponse? issRadioPasses;
+    private TleResponse? issTLE;
+
+    // Worcester, MA coordinates
+    private const double worcesterLat = 42.2626;
+    private const double worcesterLng = -71.8023;
+    private const double worcesterAlt = 0;
 
     protected override async Task OnInitializedAsync()
     {
-        double latitude = 42.3601;
-        double longitude = -71.0589;
+        double bostonLat = 42.3601;
+        double bostonLng = -71.0589;
 
-        var weatherTask = weatherService.GetWeatherData(latitude, longitude);
+        // Launch all API calls in parallel for maximum efficiency
+        var weatherTask = weatherService.GetWeatherData(bostonLat, bostonLng);
         var rocketTask = rocketLaunchService.GetUpcomingLaunches();
+        var issTask = n2yoService.GetISSPosition(worcesterLat, worcesterLng, worcesterAlt);
+        var hubbleTask = n2yoService.GetSatellitePosition(20580, worcesterLat, worcesterLng, worcesterAlt);
+        var satellitesTask = n2yoService.GetSatellitesAbove(worcesterLat, worcesterLng, worcesterAlt, 70, 0);
+        var visualPassesTask = n2yoService.GetVisualPasses(25544, worcesterLat, worcesterLng, worcesterAlt, 10, 300);
+        var radioPassesTask = n2yoService.GetRadioPasses(25544, worcesterLat, worcesterLng, worcesterAlt, 5, 10);
+        var tleTask = n2yoService.GetSatelliteTLE(25544);
 
-        await Task.WhenAll(weatherTask, rocketTask);
+        await Task.WhenAll(weatherTask, rocketTask, issTask, hubbleTask, satellitesTask, visualPassesTask, radioPassesTask, tleTask);
 
         weatherData = await weatherTask;
         rocketData = await rocketTask;
+        issPosition = await issTask;
+        hubblePosition = await hubbleTask;
+        satellitesAbove = await satellitesTask;
+        issVisualPasses = await visualPassesTask;
+        issRadioPasses = await radioPassesTask;
+        issTLE = await tleTask;
+    }
+
+    private string GetCompassDirection(double azimuth)
+    {
+        var directions = new[] { "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW" };
+        var index = (int)Math.Round(azimuth / 22.5) % 16;
+        return directions[index];
     }
 }

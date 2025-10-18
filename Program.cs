@@ -14,6 +14,9 @@ builder.Services.AddHttpClient<weatherService>();
 builder.Services.AddScoped<RocketLaunchLiveService>();
 builder.Services.AddHttpClient<RocketLaunchLiveService>();
 
+builder.Services.AddScoped<n2yoService>();
+builder.Services.AddHttpClient<n2yoService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
