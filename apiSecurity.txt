@@ -1,0 +1,33 @@
+In your project root (where .csproj is), run:
+
+- dotnet user-secrets init
+
+Then add secrets one by one:
+
+- dotnet user-secrets set "NASA:ApiKey" "your-nasa-key-here"
+- dotnet user-secrets set "N2YO:ApiKey" "your-n2yo-key-here"
+- dotnet user-secrets set "Weather:ApiKey" "your-weather-key-here"
+
+Then in appsettings.json, just define the structure (no keys):
+
+{
+  "NASA": {
+    "ApiUrl": "https://api.nasa.gov/"
+  },
+  "N2YO": {
+    "ApiUrl": "https://api.n2yo.com/"
+  },
+  "Weather": {
+    "ApiUrl": "https://api.openweathermap.org/"
+  }
+}
+
+And in your C# code (e.g., a service class or Program.cs):
+
+var nasaKey = builder.Configuration["NASA:ApiKey"];
+
+
+To verify secrets are working, run:
+
+- dotnet user-secrets list
+

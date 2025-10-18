@@ -1,0 +1,70 @@
+# ===================================
+# Build & Publish Artifacts
+# ===================================
+bin/
+obj/
+out/
+publish/
+dist/
+
+# ===================================
+# IDE & Editor Settings
+# ===================================
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ===================================
+# OS & System Files
+# ===================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===================================
+# Logs
+# ===================================
+*.log
+logs/
+Logs/
+
+# ===================================
+# Frontend Artifacts (Blazor)
+# ===================================
+# Client-side build artifacts (WASM or hybrid)
+node_modules/
+*.cache
+wwwroot/_framework/
+wwwroot/_content/
+wwwroot/css/
+wwwroot/js/
+wwwroot/*.map
+
+# ===================================
+# Entity Framework (if used)
+# ===================================
+# Ignore EF Core generated files if you're experimenting locally
+*.db
+*.sqlite
+*.bak
+# Uncomment the next line if you regenerate migrations frequently
+# Migrations/
+
+# ===================================
+# Configuration & Secrets
+# ===================================
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+# Ignore exported or custom secrets directories
+**/secrets/
+
+# ===================================
+# Environment files
+# ===================================
+.env
+.env.*
