@@ -119,6 +119,7 @@ private async Task RunAllTestsAsync()
         {
             var upcoming = await SpaceDevsService.GetUpcomingLaunchesAsync(1);
             AddLog("GetUpcomingLaunchesAsync returned a result.", upcoming != null);
+            // Console.WriteLine($"Upcoming Launches: {upcoming[index: 0].Pad.latitude}, {upcoming[0].Pad.longitude}");
 
             var previous = await SpaceDevsService.GetPreviousLaunchesAsync(1);
             AddLog("GetPreviousLaunchesAsync returned a result.", previous != null);

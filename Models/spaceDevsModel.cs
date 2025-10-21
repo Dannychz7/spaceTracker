@@ -168,6 +168,12 @@ namespace spaceTracker.Models
         [JsonPropertyName("name")]
         public string? Name { get; set; }
 
+        [JsonPropertyName("latitude")]
+        public float? latitude { get; set; }
+
+        [JsonPropertyName("longitude")]
+        public float? longitude { get; set; }
+
         [JsonPropertyName("location")]
         public Location? Location { get; set; }
     }

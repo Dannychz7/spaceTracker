@@ -31,7 +31,12 @@ else
             <li>
                 <strong>Mission:</strong> @launch.Name<br />
                 <strong>Provider:</strong> @(launch.Provider?.Name ?? "Unknown")<br />
-                <strong>Launch Time:</strong> @(launch.Win_open?.ToString("u") ?? launch.T0?.ToString("u"))<br />
+                <strong>Launch Time:</strong> @(
+                    (launch.Win_open?.ToString("u")) 
+                    ?? (launch.T0?.ToString("u")) 
+                    ?? launch.date_str 
+                    ?? "N/A"
+                )<br />
                 <strong>Pad:</strong> @(launch.Pad?.Name ?? "Unknown")<br />
                 <strong>Vehicle:</strong> @(launch.Vehicle?.Name ?? "Unknown")<br />
                 <strong>Pad Location:</strong> 
@@ -247,8 +252,4 @@ else
         var index = (int)Math.Round(azimuth / 22.5) % 16;
         return directions[index];
     }
-
-    
-
-    
 }

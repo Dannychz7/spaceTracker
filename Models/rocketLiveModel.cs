@@ -27,6 +27,9 @@ namespace spaceTracker.Models
         [JsonPropertyName("t0")]
         public DateTime? T0 { get; set; }
 
+        [JsonPropertyName("date_str")]
+        public string? date_str { get; set; }
+
         [JsonPropertyName("provider")]
         public ProviderInfo? Provider { get; set; }
 
