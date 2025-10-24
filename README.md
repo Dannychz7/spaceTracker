@@ -20,4 +20,26 @@ Under Development, TODO LIST:
 9) Nasa service, ensure proper logging and json sanitation - on hold (due to government shutdown, all nasa apis are down, so as of now, it's useless)
 
 
+Scope for each webpage
+-----------------------------------------------
+"/" dashboardLoader.cs
+    - Will contain a gloab either 2d or 3d, not decided yet, which tracks upcoming rocket launches, satlite launches, and other events
+    - Will also contain a tracker for the ISS and where it is on earth
+    - Will also track 5 other satlites
+    - Each location will have more info about it like launch details, location, etc...
+"/launch5" liveLaunchLoader.cs
+    - Will contain a dashboard of the next top 5 all next to each other
+    - Time and weather will show for current location, so we'll say worcester, ma
+    - When clicking on a rocket, it will change color depending on time, weather, wind anitmation, cold, hot, etc... 
+    - Each rocket will have a different animation depending on state it is in (ready, prepping, successful launch, etc...)
+"/Astronouts"
+    - A fun interactive Part here, showcasing famous astronought
+    - name, dob, description, flights flown, etc... 
+    - Maybe we'll do a search bar and maybe this bookshelf style where the screen is a astronought and the you can click through ? 
+    - Something like: "overlay page navigation animation"
+    - Another way to explain: a multi-page animated transition effect — where each “page” of the website moves or slides in/out with a smooth animation, almost like flipping through a digital stack of pages or cards.
+"/Programs"
+    - Same idea but maybe a timeline of the different programs in a timeline loaction
 
+.... IDK pass this point: 
+"/funFacts? "
