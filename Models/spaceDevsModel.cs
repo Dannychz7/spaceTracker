@@ -235,14 +235,59 @@ namespace spaceTracker.Models
         [JsonPropertyName("name")]
         public string? Name { get; set; }
 
+        [JsonPropertyName("status")]
+        public SimpleTypeObject? Status { get; set; }  // Active, Retired, etc.
+
+        [JsonPropertyName("type")]
+        public SimpleTypeObject? Type { get; set; }  // Government, Commercial, etc.
+
         [JsonPropertyName("nationality")]
         public List<NationalityInfo>? Nationality { get; set; }
 
         [JsonPropertyName("date_of_birth")]
         public DateTime? DateOfBirth { get; set; }
 
+        [JsonPropertyName("date_of_death")]
+        public DateTime? DateOfDeath { get; set; }
+
         [JsonPropertyName("agency")]
         public Agency? Agency { get; set; }
+
+        [JsonPropertyName("profile_image_thumbnail")]
+        public string? ProfileImageThumbnail { get; set; }
+
+        [JsonPropertyName("profile_image")]
+        public string? ProfileImage { get; set; }
+
+        [JsonPropertyName("bio")]
+        public string? Bio { get; set; }
+
+        [JsonPropertyName("twitter")]
+        public string? Twitter { get; set; }
+
+        [JsonPropertyName("instagram")]
+        public string? Instagram { get; set; }
+
+        [JsonPropertyName("wiki")]
+        public string? Wiki { get; set; }
+
+        [JsonPropertyName("first_flight")]
+        public DateTime? FirstFlight { get; set; }
+
+        [JsonPropertyName("last_flight")]
+        public DateTime? LastFlight { get; set; }
+
+        [JsonPropertyName("flights_count")]
+        public int FlightsCount { get; set; }
+
+        [JsonPropertyName("landings_count")]
+        public int LandingsCount { get; set; }
+
+        [JsonPropertyName("spacewalks_count")]
+        public int SpacewalksCount { get; set; }
+
+        [JsonPropertyName("time_in_space")]
+        public string? TimeInSpace { get; set; }  // Duration string
     }
 
     public class SpaceEvent
