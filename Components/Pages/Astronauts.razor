@@ -1,64 +1,42 @@
 ﻿@page "/astronauts"
-@attribute [StreamRendering]
+@using spaceTracker.Models
+@using spaceTracker.Services
+@inject SpaceDevsService spaceDevsService
 
-<PageTitle>Weather</PageTitle>
+<PageTitle>Astronauts</PageTitle>
 
-<h1>Weather</h1>
+<h1>Famous Astronauts</h1>
 
-<p>This component demonstrates showing data.</p>
+<!-- Optional search bar -->
+<input type="text" placeholder="Search astronaut..." @bind="searchTerm" />
 
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th aria-label="Temperature in Celsius">Temp. (C)</th>
-                <th aria-label="Temperature in Farenheit">Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+<!-- Container for animated card/overlay pages -->
+<div class="astronaut-stack">
+    @* TODO: Loop through astronauts from spaceDevsService *@
+    @* Each astronaut will be a "page" or "card" in the stack *@
+    @* Animate pages sliding left/right or stacking on top of each other *@
+    @* Include astronaut details: name, DOB, description, flights, etc. *@
+    @* Include navigation buttons for next/previous *@
+    @* Optional: swipe gestures for mobile *@
+</div>
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private string searchTerm = string.Empty;
 
-    protected override async Task OnInitializedAsync()
-    {
-        // Simulate asynchronous loading to demonstrate streaming rendering
-        await Task.Delay(500);
+    // TODO: Create a variable to hold current page index for animation
+    // private int currentIndex = 0;
 
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
-    }
+    // TODO: Methods to show next/previous astronaut card
+    // private void ShowNext() { ... }
+    // private void ShowPrevious() { ... }
 
-    private class WeatherForecast
-    {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    }
+    // TODO: Optional: Method to filter astronauts based on search term
+    // private IEnumerable<Astronaut> FilteredAstronauts() { ... }
+
+    // TODO: OnInitializedAsync can optionally fetch astronauts if needed
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     var data = await spaceDevsService.GetAstronautsAsync();
+    //     // store data locally for rendering
+    // }
 }
