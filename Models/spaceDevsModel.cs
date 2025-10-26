@@ -250,6 +250,9 @@ namespace spaceTracker.Models
         [JsonPropertyName("date_of_death")]
         public DateTime? DateOfDeath { get; set; }
 
+        [JsonPropertyName("image")]
+        public ProgramImage? Image { get; set; }
+
         [JsonPropertyName("agency")]
         public Agency? Agency { get; set; }
 
@@ -463,8 +466,17 @@ namespace spaceTracker.Models
         [JsonPropertyName("end_date")]
         public DateTime? EndDate { get; set; }
 
+        [JsonPropertyName("image")]
+        public ProgramImage? Image { get; set; }
+
         [JsonPropertyName("agencies")]
         public List<Agency>? Agencies { get; set; }
+    }
+
+    public class ProgramImage
+    {
+        [JsonPropertyName("image_url")]
+        public string? ImageUrl { get; set; }
     }
 
     public class StarshipDashboard
@@ -519,5 +531,5 @@ namespace spaceTracker.Models
         [JsonPropertyName("name")]
         public string? Name { get; set; }
     }
-    
+
 }

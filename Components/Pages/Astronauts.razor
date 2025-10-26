@@ -23,7 +23,11 @@
                 @foreach (var astronaut in searchPreviewResults.Take(5))
                 {
                     <div class="search-preview-item" @onclick="() => SelectAstronautFromPreview(astronaut)">
-                        @if (!string.IsNullOrEmpty(astronaut.ProfileImageThumbnail))
+                        @if (astronaut.Image?.ImageUrl != null)
+                        {
+                            <img src="@astronaut.Image.ImageUrl" alt="@astronaut.Name" class="search-preview-image" />
+                        }
+                        else if (!string.IsNullOrEmpty(astronaut.ProfileImageThumbnail))
                         {
                             <img src="@astronaut.ProfileImageThumbnail" alt="@astronaut.Name" class="search-preview-image" />
                         }
@@ -75,30 +79,35 @@
                 <div class="astronaut-card @(index == currentIndex ? "active" : "")"
                      style="transform: translateX(@(100 * (index - currentIndex))%) scale(@(index == currentIndex ? "1" : "0.9"))">
                     <div class="card-content">
-                        <div class="profile-header">
-                            @if (!string.IsNullOrEmpty(astronaut.ProfileImage))
-                            {
-                                <img src="@astronaut.ProfileImage" alt="@astronaut.Name" class="astronaut-image" @onerror="e => OnImageError(e, astronaut)" />
-                            }
-                            else if (!string.IsNullOrEmpty(astronaut.ProfileImageThumbnail))
-                            {
-                                <img src="@astronaut.ProfileImageThumbnail" alt="@astronaut.Name" class="astronaut-image" />
-                            }
-                            else
-                            {
-                                <div class="astronaut-image placeholder">
-                                    <span>@(astronaut.Name?[0])</span>
-                                </div>
-                            }
-                            <div class="profile-info">
-                                <h2>@astronaut.Name</h2>
-                                <p class="nationality">@(string.Join(", ", astronaut.Nationality?.Select(n => n.NationalityName) ?? Array.Empty<string>()))</p>
-                                <p class="status @(astronaut.Status?.Name?.ToLower() ?? "unknown")">@(astronaut.Status?.Name ?? "Status Unknown")</p>
-                                <p class="agency">@astronaut.Agency?.Name</p>
-                            </div>
-                        </div>
 
-                        <div class="stats-dashboard">
+                <div class="profile-header">
+                    @if (astronaut.Image?.ImageUrl != null)
+                    {
+                        <img src="@astronaut.Image.ImageUrl" alt="@astronaut.Name" class="astronaut-image" />
+                    }
+                    else if (!string.IsNullOrEmpty(astronaut.ProfileImage))
+                    {
+                        <img src="@astronaut.ProfileImage" alt="@astronaut.Name" class="astronaut-image" @onerror="e => OnImageError(e, astronaut)" />
+                    }
+                    else if (!string.IsNullOrEmpty(astronaut.ProfileImageThumbnail))
+                    {
+                        <img src="@astronaut.ProfileImageThumbnail" alt="@astronaut.Name" class="astronaut-image" />
+                    }
+                    else
+                    {
+                        <div class="astronaut-image placeholder">
+                            <span>@(astronaut.Name?[0])</span>
+                        </div>
+                    }
+                    <div class="profile-info">
+                        <h2>@astronaut.Name</h2>
+                        <p class="nationality">@(string.Join(", ", astronaut.Nationality?.Select(n => n.NationalityName) ?? Array.Empty<string>()))</p>
+                        <p class="status @(astronaut.Status?.Name?.ToLower() ?? "unknown")">@(astronaut.Status?.Name ?? "Status Unknown")</p>
+                        <p class="agency">@astronaut.Agency?.Name</p>
+                    </div>
+                </div>
+
+                <div class="stats-dashboard">
                             <div class="stat-group">
                                 <div class="stat">
                                     <span class="number">@astronaut.FlightsCount</span>
