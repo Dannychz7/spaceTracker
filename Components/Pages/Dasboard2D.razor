@@ -2,6 +2,7 @@
 @using spaceTracker.Models
 @using spaceTracker.Services
 @inject SpaceDevsService spaceDevsService
+@inject weatherService weatherService
 @rendermode InteractiveServer
 
 <PageTitle>2D Dashboard</PageTitle>
@@ -69,6 +70,19 @@
                             <span class="value">@(launch.Pad?.Location?.Name ?? "Unknown")</span>
                         </div>
                         <div class="info-item">
+                            <span class="label">Weather:</span>
+                            <span class="valeu">
+                            @if (launchWeather.TryGetValue(selectedIndex, out var weather) && weather?.Current != null)
+                            {
+                                @($"{weather.Current.Temperature_2m:F1}°C, Wind: {weather.Current.WindSpeed_10m:F1} km/h")
+                            }
+                            else
+                            {
+                                @("Loading...")
+                            }
+                            </span>
+                        </div>
+                        <div class="info-item">
                             <span class="label">Provider:</span>
                             <span class="value">@(launch.Provider?.Name ?? "Unknown")</span>
                         </div>
@@ -119,11 +133,16 @@
 
 @code {
     private List<SpaceDevsLaunch> launches = new List<SpaceDevsLaunch>();
+    private Dictionary<int, weatherResponse?> launchWeather = new Dictionary<int, weatherResponse?>();
     private int selectedIndex = 0;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadLaunches();
+        if (launches.Any())
+        {
+            await LoadWeatherForLaunch(0);
+        }
     }
 
     private async Task LoadLaunches()
@@ -136,10 +155,10 @@
         }
     }
 
-    private void SelectLaunch(int index)
+    private async Task SelectLaunch(int index)
     {
         selectedIndex = index;
-        StateHasChanged();
+        await LoadWeatherForLaunch(index);
     }
 
     private double LongitudeToX(float longitude)
@@ -186,5 +205,15 @@
             dotX + Math.Cos(angle) * distance,
             dotY + Math.Sin(angle) * distance - 15
         );
+    }
+
+    private async Task LoadWeatherForLaunch(int index)
+    {
+        if (launchWeather.ContainsKey(index)) return;
+
+        var launch = launches[index];
+        var weather = await weatherService.GetWeatherData(launch.Pad.latitude.Value, launch.Pad.longitude.Value);
+        launchWeather[index] = weather;
+        StateHasChanged();
     }
 }

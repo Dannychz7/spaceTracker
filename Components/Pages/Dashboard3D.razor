@@ -1,0 +1,82 @@
+﻿@page "/3d"
+@using spaceTracker.Models
+@using spaceTracker.Services
+@inject SpaceDevsService spaceDevsService
+@inject n2yoService n2yoService
+@inject CesiumService cesiumService
+@implements IAsyncDisposable
+@rendermode InteractiveServer
+
+<PageTitle>3D Dashboard</PageTitle>
+
+<h1>Upcoming Launch Locations</h1>
+
+<div id="cesiumContainer" style="width: 100%; height: 80vh;"></div>
+
+@code {
+    private List<SpaceDevsLaunch> launches = new();
+    private SatellitePosition? issPosition;
+    private System.Threading.Timer? _timer;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        launches = await spaceDevsService.GetUpcomingLaunchesAsync(5);
+        issPosition = await n2yoService.GetISSPosition(42.2626, -71.8023, 0);
+        
+        // Update ISS every 5 seconds
+        _timer = new System.Threading.Timer(async _ => await UpdateISSPosition(), null, 5000, 5000);
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await cesiumService.InitializeGlobeAsync("cesiumContainer");
+            
+            // Add launch site markers from real data
+            foreach (var launch in launches)
+            {
+                if (launch.Pad?.latitude != null && launch.Pad?.longitude != null)
+                {
+                    await cesiumService.AddMarkerAsync(
+                        launch.Pad.latitude.Value,
+                        launch.Pad.longitude.Value,
+                        launch.Name,
+                        $"{launch.Mission?.Description ?? "No description"}<br/>Launch: {launch.Net?.ToString("g") ?? "TBD"}"
+                    );
+                }
+            }
+            
+            // Add ISS marker
+            if (issPosition?.Positions?.Count > 0)
+            {
+                var pos = issPosition.Positions[0];
+                await cesiumService.AddMarkerAsync(
+                    pos.Satlatitude,
+                    pos.Satlongitude,
+                    "ISS",
+                    $"International Space Station<br/>Altitude: {pos.Sataltitude:F2} km"
+                );
+            }
+        }
+    }
+
+    private async Task UpdateISSPosition()
+    {
+        issPosition = await n2yoService.GetISSPosition(42.2626, -71.8023, 0);
+        await InvokeAsync(StateHasChanged);
+    }
+    
+    public async ValueTask DisposeAsync()
+    {
+        _timer?.Dispose();
+        try
+        {
+            await cesiumService.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // Circuit disconnected during page refresh
+        }
+    }
+}

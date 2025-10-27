@@ -22,11 +22,17 @@ Under Development, TODO LIST:
 
 Scope for each webpage
 -----------------------------------------------
-"/" dashboardLoader.cs
-    - Will contain a gloab either 2d or 3d, not decided yet, which tracks upcoming rocket launches, satlite launches, and other events
+"/" Home.cs
+    - Will give basic information about the site as a whole
+"/3d" Dashboard3D.cs
+    - Will contain a 3d gloab, tracks upcoming rocket launches, satlite launches, and other events
     - Will also contain a tracker for the ISS and where it is on earth
     - Will also track 5 other satlites
     - Each location will have more info about it like launch details, location, etc...
+"/2d" Dashboard2D.cs
+    - A simpler, easier to run version of dashboard on a 2d map
+    - Displays the location of the next 5 launches on the map
+    - Selectign a location brings up info about the launch / location
 "/launch5" liveLaunchLoader.cs
     - Will contain a dashboard of the next top 5 all next to each other
     - Time and weather will show for current location, so we'll say worcester, ma

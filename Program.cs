@@ -20,6 +20,8 @@ builder.Services.AddHttpClient<n2yoService>();
 builder.Services.AddScoped<SpaceDevsService>();
 builder.Services.AddHttpClient<SpaceDevsService>();
 
+builder.Services.AddTransient<CesiumService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
