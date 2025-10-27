@@ -1,7 +1,7 @@
 @page "/Programs"
 @using spaceTracker.Models
 @using spaceTracker.Services
-@inject SpaceDevsService spaceDevsService
+
 
 <PageTitle>Space Programs Timeline</PageTitle>
 
@@ -19,13 +19,22 @@
         </div>
     }
 
+    @{
+        int? lastYear = null;
+    }
+
     <div class="timeline">
         @foreach (var program in programs)
         {
+            var year = program.StartDate?.Year;
+            if (year != lastYear)
+            {
+                <div class="year-divider">@year</div>
+                lastYear = year;
+            }
+
             <div class="timeline-item @(program.EndDate == null ? "active" : "completed")">
-                <div class="timeline-marker">
-                    <div class="marker-dot"></div>
-                </div>
+                <div class="timeline-marker"><div class="marker-dot"></div></div>
                 <div class="timeline-content">
                     @if (program.Image?.ImageUrl != null)
                     {
@@ -33,6 +42,7 @@
                             <img src="@program.Image.ImageUrl" alt="@program.Name" />
                         </div>
                     }
+
                     <div class="program-header">
                         <h2>@program.Name</h2>
                         @if (program.EndDate == null)
@@ -44,18 +54,17 @@
                             <span class="status-badge completed-badge">Completed</span>
                         }
                     </div>
+
                     <div class="program-dates">
-                        <span class="date-item">
-                            <strong>Started:</strong> @(program.StartDate?.ToString("MMMM dd, yyyy") ?? "Unknown")
-                        </span>
+                        <span><strong>Started:</strong> @(program.StartDate?.ToString("MMMM dd, yyyy") ?? "Unknown")</span>
                         @if (program.EndDate != null)
                         {
-                            <span class="date-item">
-                                <strong>Ended:</strong> @program.EndDate.Value.ToString("MMMM dd, yyyy")
-                            </span>
+                            <span><strong>Ended:</strong> @program.EndDate.Value.ToString("MMMM dd, yyyy")</span>
                         }
                     </div>
+
                     <p class="program-description">@program.Description</p>
+
                     @if (program.Agencies?.Any() == true)
                     {
                         <div class="agencies">
@@ -70,6 +79,11 @@
             </div>
         }
     </div>
+
+    @if (!isLoading && errorMessage == null)
+    {
+        <button class="load-more" @onclick="LoadNextBatchAsync">Load More</button>
+    }
 
     @if (isLoading && programs.Count > 0)
     {
@@ -86,58 +100,3 @@
         </div>
     }
 </div>
-
-@code {
-    private List<SpaceProgram> programs = new();
-    private HashSet<int> loadedProgramIds = new();
-    private bool isLoading = false;
-    private string? errorMessage = null;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadProgramsLazily();
-    }
-
-    private async Task LoadProgramsLazily()
-    {
-        isLoading = true;
-        errorMessage = null;
-        
-        try
-        {
-            // Fetch programs one by one for lazy loading effect
-            for (int i = 0; i < 30; i++)
-            {
-                var programBatch = await spaceDevsService.SpaceProg(limit: 1, offset: i);
-                
-                if (programBatch.Any())
-                {
-                    var program = programBatch[0];
-                    
-                    // Only add if we haven't seen this program ID before
-                    if (!loadedProgramIds.Contains(program.Id))
-                    {
-                        loadedProgramIds.Add(program.Id);
-                        programs.Add(program);
-                        programs = programs.OrderBy(p => p.StartDate ?? DateTime.MaxValue).ToList();
-                        StateHasChanged(); // Trigger UI update after each program
-                        await Task.Delay(50); // Small delay for smooth visual effect
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Failed to load programs: {ex.Message}";
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
-        }
-    }
-}
