@@ -1,0 +1,190 @@
+@page "/2d"
+@using spaceTracker.Models
+@using spaceTracker.Services
+@inject SpaceDevsService spaceDevsService
+@rendermode InteractiveServer
+
+<PageTitle>2D Dashboard</PageTitle>
+
+<div class="dashboard-container">
+    <h1>Upcoming Launch Locations</h1>
+    
+    @if (launches.Any())
+    {
+        <div class="map-container">
+            <div class="map-wrapper">
+                <img src="/world_map.jpg" 
+                    alt="World Map" 
+                    class="world-map-image"/>
+                <svg viewBox="0 0 1000 500" class="world-map-overlay">
+                    <!-- Launch markers -->
+                    @foreach (var launch in launches)
+                    {
+                        var x = LongitudeToX(launch.Pad.longitude.Value);
+                        var y = LatitudeToY(launch.Pad.latitude.Value);
+                        var index = launches.IndexOf(launch);
+                        var labelOffset = GetLabelOffset(index, x, y);
+                        
+                        <g class="marker">
+                            <circle cx="@x" cy="@y" r="8" 
+                                    fill="@(selectedIndex == index ? "#ff4444" : "#00ff88")" 
+                                    class="marker-pulse"
+                                    @onclick="() => SelectLaunch(index)"/>
+                            <line x1="@x" y1="@y" 
+                                x2="@labelOffset.x" y2="@labelOffset.y" 
+                                stroke="@(selectedIndex == index ? "#ff4444" : "#00ff88")" 
+                                stroke-width="1" 
+                                opacity="0.5"/>
+                            <text x="@labelOffset.x" y="@labelOffset.y" 
+                                fill="white" 
+                                font-size="12" 
+                                text-anchor="middle" 
+                                font-weight="bold"
+                                class="marker-label"
+                                @onclick="() => SelectLaunch(index)">@(launch.Mission?.Name ?? launch.Name)</text>
+                        </g>
+                    }
+                </svg>
+            </div>
+        </div>
+
+        <div class="launch-details">
+            @if (selectedIndex >= 0 && selectedIndex < launches.Count)
+            {
+                var launch = launches[selectedIndex];
+                <div class="detail-card">
+                    <div class="launch-number">Launch #@(selectedIndex + 1)</div>
+                    <h2>@launch.Name</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Rocket:</span>
+                            <span class="value">@(launch.Rocket?.Configuration?.Name ?? "Unknown")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Launch Date:</span>
+                            <span class="value">@(launch.Net?.ToString("MMM dd, yyyy HH:mm") ?? "TBD")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Location:</span>
+                            <span class="value">@(launch.Pad?.Location?.Name ?? "Unknown")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Provider:</span>
+                            <span class="value">@(launch.Provider?.Name ?? "Unknown")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Mission:</span>
+                            <span class="value">@(launch.Mission?.Name ?? "Unknown")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Status:</span>
+                            <span class="value status-@(launch.Status?.Abbrev?.ToLower())">@(launch.Status?.Name ?? "Unknown")</span>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(launch.Mission?.Description))
+                    {
+                        <div class="mission-description">
+                            <h3>Mission Details</h3>
+                            <p>@launch.Mission.Description</p>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="launch-list">
+            <h3>Next 5 Launches</h3>
+            @foreach (var launch in launches)
+            {
+                var index = launches.IndexOf(launch);
+                <div class="launch-item @(selectedIndex == index ? "selected" : "")" 
+                     @onclick="() => SelectLaunch(index)">
+                    <span class="number">@(index + 1)</span>
+                    <div class="launch-info">
+                        <div class="name">@launch.Name</div>
+                        <div class="date">@(launch.Net?.ToString("MMM dd, HH:mm") ?? "TBD")</div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading launch data...</p>
+        </div>
+    }
+</div>
+
+@code {
+    private List<SpaceDevsLaunch> launches = new List<SpaceDevsLaunch>();
+    private int selectedIndex = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLaunches();
+    }
+
+    private async Task LoadLaunches()
+    {
+        var allLaunches = await spaceDevsService.GetUpcomingLaunchesAsync(limit: 5);
+        launches = allLaunches.Where(l => l.Pad?.latitude != null && l.Pad?.longitude != null).ToList();
+        if (launches.Any())
+        {
+            selectedIndex = 0;
+        }
+    }
+
+    private void SelectLaunch(int index)
+    {
+        selectedIndex = index;
+        StateHasChanged();
+    }
+
+    private double LongitudeToX(float longitude)
+    {
+        // Convert longitude (-180 to 180) to X coordinate (0 to 1000)
+        return ((longitude + 180) / 360.0) * 1000;
+    }
+
+    private double LatitudeToY(float latitude)
+    {
+        // Convert latitude (-90 to 90) to Y coordinate (0 to 500)
+        // Inverted because SVG Y increases downward
+        return ((90 - latitude) / 180.0) * 500;
+    }
+
+    private (double x, double y) GetLabelOffset(int index, double dotX, double dotY)
+    {
+        var overlapCount = 0;
+        var currentLaunch = launches[index];
+        
+        // Count how many launches share similar coordinates
+        for (int i = 0; i < launches.Count; i++)
+        {
+            if (i == index) continue;
+            
+            var pad = launches[i].Pad;
+            if (pad?.latitude == null || pad?.longitude == null) continue;
+            
+            var otherX = LongitudeToX(pad.longitude.Value);
+            var otherY = LatitudeToY(pad.latitude.Value);
+            
+            // Check if within 20 pixels (overlapping)
+            if (Math.Abs(otherX - dotX) < 20 && Math.Abs(otherY - dotY) < 20)
+            {
+                if (i < index) overlapCount++;
+            }
+        }
+        
+        // Spread labels in a circle pattern around the dot
+        var angle = (overlapCount * 60) * (Math.PI / 180); // 60 degrees apart
+        var distance = 30 + (overlapCount * 5); // Increase distance for each overlap
+        
+        return (
+            dotX + Math.Cos(angle) * distance,
+            dotY + Math.Sin(angle) * distance - 15
+        );
+    }
+}
