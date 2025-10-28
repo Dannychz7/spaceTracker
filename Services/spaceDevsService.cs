@@ -1,21 +1,25 @@
 using spaceTracker.Models;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
-
+using spaceTracker.Data;
 namespace spaceTracker.Services;
+using Microsoft.EntityFrameworkCore;
+using spaceTracker.Data.Entities;
 public class SpaceDevsService
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<SpaceDevsService> _logger;
-    private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
-    private const string BASE_URL = "https://lldev.thespacedevs.com/2.3.0";
+private readonly HttpClient _httpClient;
+private readonly ILogger<SpaceDevsService> _logger;
+private readonly SpaceTrackerDbContext _context;
+private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
+private const string BASE_URL = "https://lldev.thespacedevs.com/2.3.0";
 
-    public SpaceDevsService(HttpClient httpClient, ILogger<SpaceDevsService> logger)
-    {
-        _httpClient = httpClient;
-        _logger = logger;
-        _logger.LogInformation("SpaceDevsService initialized");
-    }
+public SpaceDevsService(HttpClient httpClient, ILogger<SpaceDevsService> logger, SpaceTrackerDbContext context)
+{
+    _httpClient = httpClient;
+    _logger = logger;
+    _context = context;
+    _logger.LogInformation("SpaceDevsService initialized");
+}
 
     #region Launches
     public async Task<List<SpaceDevsLaunch>> GetUpcomingLaunchesAsync(int limit = 5, int offset = 0)
@@ -349,26 +353,98 @@ public class SpaceDevsService
 
     #region Programs
     public async Task<List<spaceTracker.Models.SpaceProgram>> SpaceProg(int limit = 10, int offset = 0)
+{
+    try
     {
-        var url = $"{BASE_URL}/programs/?limit={limit}&offset={offset}";
-        _logger.LogDebug("Fetching programs with URL: {Url}", url);
+        // Check last update from existing programs
+        var lastUpdated = await _context.SpacePrograms
+            .OrderByDescending(p => p.LastUpdated)
+            .Select(p => p.LastUpdated)
+            .FirstOrDefaultAsync();
+        
+        var now = DateTime.UtcNow;
+        bool shouldFetchApi = lastUpdated == default || (now - lastUpdated).TotalDays >= 7; // 1 week
 
-        try
+        if (shouldFetchApi)
         {
+            // Call the remote API
+            var url = $"{BASE_URL}/programs/?limit={limit}&offset={offset}";
+            _logger.LogDebug("Fetching programs with URL: {Url}", url);
+            
             var response = await _httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
-
+            
             var content = await response.Content.ReadAsStringAsync();
             _logger.LogDebug("Programs response length: {Length}", content.Length);
 
             var result = JsonSerializer.Deserialize<ProgramResponse>(content, _jsonOptions);
-            return result?.Results ?? [];
+            
+            if (result?.Results != null)
+            {
+                // Get existing program IDs to skip duplicates
+                var existingIds = await _context.SpacePrograms
+                    .Select(sp => sp.Id)
+                    .ToHashSetAsync();
+
+                // Only add new programs (skip existing ones)
+                foreach (var p in result.Results)
+                {
+                    if (!existingIds.Contains(p.Id))
+                    {
+                        var entity = new SpaceProgramEntity
+                        {
+                            Id = p.Id,
+                            Name = p.Name,
+                            Description = p.Description,
+                            StartDate = p.StartDate,
+                            EndDate = p.EndDate,
+                            Image = p.Image,
+                            Agencies = p.Agencies,
+                            CreatedAt = now,
+                            LastUpdated = now
+                        };
+                        
+                        _context.SpacePrograms.Add(entity);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+            }
         }
-        catch (Exception ex)
+
+        // Always return from database
+        var programs = await _context.SpacePrograms
+            .OrderBy(sp => sp.Id)
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
+
+        // Map entities to models
+        return programs.Select(e => new spaceTracker.Models.SpaceProgram
         {
-            _logger.LogError(ex, "Error fetching programs");
-            return [];
-        }
+            Id = e.Id,
+            Name = e.Name,
+            Description = e.Description,
+            StartDate = e.StartDate,
+            EndDate = e.EndDate,
+            Image = e.Image,
+            Agencies = e.Agencies
+        }).ToList();
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error fetching programs");
+        return [];
+    }
+}
+
+    public async Task<ProgramResponse?> GetProgramsAsync()
+    {
+        var response = await _httpClient.GetAsync("https://lldev.thespacedevs.com/2.3.0/programs/?limit=100");
+        if (!response.IsSuccessStatusCode) return null;
+
+        var json = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<ProgramResponse>(json);
     }
     #endregion
 

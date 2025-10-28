@@ -1,5 +1,8 @@
 using spaceTracker.Components;
 using spaceTracker.Services;
+using Microsoft.EntityFrameworkCore;
+using spaceTracker.Data;
+using spaceTracker.Data.Seeders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +24,19 @@ builder.Services.AddScoped<SpaceDevsService>();
 builder.Services.AddHttpClient<SpaceDevsService>();
 
 builder.Services.AddTransient<CesiumService>();
+builder.Services.AddScoped<SpaceProgramSeeder>();
+
+// Register EF Core with SQLite
+builder.Services.AddDbContext<SpaceTrackerDbContext>(options =>
+    options.UseSqlite("Data Source=spaceTracker.db"));
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<SpaceProgramSeeder>();
+    await seeder.PopulateAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
