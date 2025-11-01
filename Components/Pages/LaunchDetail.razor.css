@@ -1,0 +1,21 @@
+.launch-detail {
+  max-width:900px;
+  margin:18px auto;
+  background:var(--card-bg,#fff);
+  border-radius:10px;
+  padding:20px;
+  box-shadow:0 6px 18px rgba(15,15,15,0.06);
+}
+.launch-detail h1{ margin:0 0 8px 0; font-size:1.6rem; }
+.launch-detail .meta-row{ display:flex; gap:12px; align-items:center; color:var(--muted-text,#666); margin-bottom:12px; }
+.launch-detail .section{ margin-top:14px; }
+.launch-detail .section h3{ margin:0 0 8px 0; }
+.launch-detail .links{ margin-top:16px; display:flex; gap:12px; align-items:center; }
+.launch-detail .link{ color:var(--accent,#1976d2); font-weight:600; text-decoration:none; }
+.launch-detail .btn{ background:var(--accent,#1976d2); color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; }
+.launch-detail .profile-like{ display:flex; gap:18px; align-items:flex-start; }
+.launch-detail .detail-left{ flex:1; }
+.launch-detail .detail-right{ width:260px; }
+.launch-detail .card-muted{ background:#fbfdff; padding:12px; border-radius:8px; color:#233; }
+
+.copy-confirm{ color:var(--accent,#1976d2); font-weight:700; background:rgba(25,118,210,0.08); padding:6px 8px; border-radius:6px; }

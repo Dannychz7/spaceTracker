@@ -1,0 +1,63 @@
+@page "/bulklaunches"
+@using spaceTracker.Models
+@rendermode InteractiveServer
+
+<PageTitle>Upcoming Launches (Next 40)</PageTitle>
+
+<div class="bulk-launches-container">
+    <div class="header-row">
+        <h1>Next 40 Launches</h1>
+    <p class="subtitle">Upcoming launches</p>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading launches…</p>
+        </div>
+    }
+    else if (errorMessage != null)
+    {
+        <div class="error-message">⚠️ @errorMessage</div>
+    }
+    else
+    {
+        <div class="launch-list">
+            @foreach (var launch in launches)
+            {
+                <div class="launch-card compact">
+                    <div class="launch-thumb">
+                        @if (!string.IsNullOrEmpty(launch.Infographic))
+                        {
+                            <img src="@launch.Infographic" alt="@launch.Name" />
+                        }
+                        else
+                        {
+                            var initialsKey = launch.Provider?.Abbrev ?? launch.Provider?.Name ?? launch.Name;
+                            <div class="thumb-placeholder" style="@GetGradientStyle(initialsKey)">
+                                <span class="thumb-initials">@GetInitials(initialsKey)</span>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="launch-compact-body">
+                        <div class="launch-compact-title">
+                            <h4>@launch.Name</h4>
+                            <span class="status-badge @GetStatusClass(launch.Status?.Abbrev ?? launch.Status?.Name)" title="@GetStatusTooltip(launch.Status?.Abbrev ?? launch.Status?.Name)">@launch.Status?.Name</span>
+                        </div>
+
+                        <div class="launch-compact-net">@(launch.Net?.ToString("MMM d, HH:mm") ?? "TBD")</div>
+
+                        <div class="launch-compact-actions">
+                            @if (!string.IsNullOrEmpty(launch.Id))
+                            {
+                                <a class="link" href="/launch/@launch.Id">View details</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

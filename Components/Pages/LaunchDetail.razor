@@ -1,0 +1,286 @@
+@page "/launch/{id}"
+@using spaceTracker.Models
+@rendermode InteractiveServer
+
+@inject NavigationManager Navigation
+
+<PageTitle>Launch Details</PageTitle>
+
+@if (isLoading)
+{
+    <div class="loading"><div class="spinner"></div> Loading launch...</div>
+}
+else if (errorMessage != null)
+{
+    <div class="error-message">⚠️ @errorMessage</div>
+}
+else if (launch != null)
+{
+    <div class="launch-detail">
+        <div class="profile-like">
+            <div class="detail-image">
+                @if (!string.IsNullOrEmpty(launch.Infographic))
+                {
+                    <img src="@launch.Infographic" alt="@launch.Name" class="detail-main-image" />
+                }
+                else
+                {
+                    var initialsKey = launch.Provider?.Abbrev ?? launch.Provider?.Name ?? launch.Name;
+                    <div class="thumb-placeholder detail-thumb" style="@GetGradientStyle(initialsKey)">
+                        <span class="thumb-initials" style="color:@GetContrastColor(initialsKey)">@GetInitials(initialsKey)</span>
+                    </div>
+                }
+            </div>
+            <div class="detail-left">
+                <h1>@launch.Name</h1>
+                <div class="meta-row">
+                    <strong>Status:</strong>
+                    <span class="status-badge @GetStatusClass(launch.Status?.Abbrev ?? launch.Status?.Name)" title="@GetStatusTooltip(launch.Status?.Abbrev ?? launch.Status?.Name)">@launch.Status?.Name</span>
+                    <span class="spacer"></span>
+                    <strong>NET:</strong>
+                    <span>@(launch.Net?.ToString("f") ?? "TBD")</span>
+                </div>
+
+                <div class="section">
+                    <h3>Mission</h3>
+                    <p>@(launch.Mission?.Name ?? "—")</p>
+                    @if (!string.IsNullOrEmpty(launch.Mission?.Description))
+                    {
+                        <p>@launch.Mission.Description</p>
+                    }
+                </div>
+
+                <div class="section">
+                    <h3>Vehicle & Provider</h3>
+                    <p><strong>Provider:</strong> @launch.Provider?.Name</p>
+                    <p><strong>Rocket:</strong> @launch.Rocket?.Configuration?.FullName ?? @launch.Rocket?.Configuration?.Name</p>
+                </div>
+
+                <div class="section">
+                    <h3>Pad</h3>
+                    <p>@launch.Pad?.Name @((launch.Pad?.Location != null) ? "(" + launch.Pad.Location.Name + ")" : "")</p>
+                </div>
+
+                <div class="links">
+                    @if (!string.IsNullOrEmpty(launch.Infographic))
+                    {
+                        <a class="link" href="@launch.Infographic" target="_blank" rel="noopener">Infographic</a>
+                    }
+                    <button class="btn" @onclick="GoBack">Back to list</button>
+                </div>
+            </div>
+
+            <div class="detail-right">
+                <div class="card-muted">
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                        <div class="provider-avatar" style="width:56px; height:56px; border-radius:6px; background:#eef; display:flex; align-items:center; justify-content:center; font-weight:700;">
+                            @((launch.Provider?.Abbrev ?? launch.Provider?.Name ?? "?")[0])
+                        </div>
+                        <div>
+                            <div style="font-weight:700;">@launch.Provider?.Name</div>
+                            <div style="font-size:0.85rem; color:var(--muted-text,#666);">Provider</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:10px;">
+                        <div style="font-size:0.85rem; color:var(--muted-text,#666);">Pad Coordinates</div>
+                        @if (launch.Pad?.latitude != null && launch.Pad?.longitude != null)
+                        {
+                            <div style="font-weight:700;">@launch.Pad.latitude, @launch.Pad.longitude</div>
+                            <div style="margin-top:6px; display:flex; gap:8px; align-items:center;">
+                                <button class="btn" @onclick="() => CopyCoords(launch.Pad.latitude.Value, launch.Pad.longitude.Value)">Copy coords</button>
+                                @if (!string.IsNullOrEmpty(copyMessage))
+                                {
+                                    <span class="copy-confirm">@copyMessage</span>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card-muted">Coordinates not available</div>
+                        }
+                    </div>
+
+                    <div style="margin-top:10px;">
+                        <div style="font-size:0.85rem; color:var(--muted-text,#666);">Countdown</div>
+                        <div style="font-weight:700; font-size:1.1rem;">@RemainingTime</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string id { get; set; } = string.Empty;
+
+    private SpaceDevsLaunch? launch;
+    private bool isLoading = true;
+    private string? errorMessage;
+    private System.Timers.Timer? _timer;
+    private string RemainingTime => ComputeRemaining();
+    private string? copyMessage;
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    private string ComputeRemaining()
+    {
+        if (launch?.Net == null) return "TBD";
+        var diff = launch.Net.Value.ToUniversalTime() - DateTime.UtcNow;
+        if (diff.TotalSeconds <= 0) return "Launched";
+
+        var days = diff.Days;
+        var hours = diff.Hours;
+        var mins = diff.Minutes;
+        var secs = diff.Seconds;
+
+        if (days > 0) return $"{days}d {hours}h {mins}m";
+        if (hours > 0) return $"{hours}h {mins}m {secs}s";
+        if (mins > 0) return $"{mins}m {secs}s";
+        return $"{secs}s";
+    }
+
+    private async Task CopyCoords(float lat, float lon)
+    {
+        try
+        {
+            var text = $"{lat}, {lon}";
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", text);
+            copyMessage = "Copied!";
+            StateHasChanged();
+            // clear after 2.5s
+            _ = Task.Run(async () => { await Task.Delay(2500); copyMessage = null; await InvokeAsync(StateHasChanged); });
+        }
+        catch {
+            copyMessage = "Copy failed";
+            StateHasChanged();
+            _ = Task.Run(async () => { await Task.Delay(2500); copyMessage = null; await InvokeAsync(StateHasChanged); });
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLaunchAsync();
+        // start a simple timer to update countdown every second
+        _timer = new System.Timers.Timer(1000);
+        _timer.Elapsed += async (_, __) => await InvokeAsync(StateHasChanged);
+        _timer.AutoReset = true;
+        _timer.Start();
+    }
+
+    [Inject] private spaceTracker.Services.SpaceDevsService spaceDevsService { get; set; } = default!;
+
+    private async Task LoadLaunchAsync()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+            launch = await spaceDevsService.GetLaunchByIdAsync(id);
+            if (launch == null)
+                errorMessage = "Launch not found.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/bulklaunches");
+    }
+
+    // Gradient/initials helpers (same as BulkLaunches)
+    public string GetGradientStyle(string? key)
+    {
+        if (string.IsNullOrEmpty(key)) key = "default";
+        var sum = 0;
+        foreach (var c in key) sum += c;
+        var hue1 = sum % 360;
+        var hue2 = (hue1 + 40) % 360;
+        return $"background: linear-gradient(135deg, hsl({hue1},65%,55%), hsl({hue2},65%,45%));";
+    }
+
+    public string GetInitials(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Split(new[] { ' ', '-', '_' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1)
+            return parts[0].Substring(0, 1).ToUpperInvariant();
+        var first = parts[0].Substring(0, 1);
+        var second = parts.Length > 1 ? parts[1].Substring(0, 1) : "";
+        return (first + second).ToUpperInvariant();
+    }
+
+    // Simple contrast check: returns #fff for dark bg, #222 for light bg
+    public string GetContrastColor(string? key)
+    {
+        if (string.IsNullOrEmpty(key)) key = "default";
+        var sum = 0;
+        foreach (var c in key) sum += c;
+        var hue1 = sum % 360;
+        // Use HSL to RGB conversion for lightness 0.55
+        double l = 0.55, s = 0.65, h = hue1 / 360.0;
+        double r, g, b;
+        if (s == 0)
+            r = g = b = l;
+        else
+        {
+            double q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            double p = 2 * l - q;
+            r = HueToRgb(p, q, h + 1.0 / 3);
+            g = HueToRgb(p, q, h);
+            b = HueToRgb(p, q, h - 1.0 / 3);
+        }
+        // Perceived luminance
+        double luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+        return luminance < 0.55 ? "#fff" : "#222";
+    }
+    private double HueToRgb(double p, double q, double t)
+    {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1.0 / 6) return p + (q - p) * 6 * t;
+        if (t < 1.0 / 2) return q;
+        if (t < 2.0 / 3) return p + (q - p) * (2.0 / 3 - t) * 6;
+        return p;
+    }
+
+    public void Dispose()
+    {
+        try { _timer?.Stop(); _timer?.Dispose(); } catch { }
+    }
+
+    // Status helpers (same mapping as BulkLaunches)
+    public string GetStatusClass(string? status)
+    {
+        if (string.IsNullOrWhiteSpace(status)) return "status-neutral";
+        var key = status.Trim().ToLowerInvariant();
+        if (key.Contains("go") || key.Contains("go for launch") || key.Contains("green") || key.Contains("success") || key.Contains("launch"))
+            return "status-success";
+        if (key.Contains("tbc") || key.Contains("to be confirmed") || key.Contains("tbd") || key.Contains("tentative") || key.Contains("planned"))
+            return "status-warning";
+        if (key.Contains("hold") || key.Contains("delayed") || key.Contains("scrub") || key.Contains("failure") || key.Contains("cancelled") || key.Contains("canceled"))
+            return "status-danger";
+        return "status-neutral";
+    }
+
+    public string GetStatusTooltip(string? status)
+    {
+        if (string.IsNullOrWhiteSpace(status)) return "Status unknown";
+        var key = status.Trim().ToLowerInvariant();
+        if (key.Contains("go") || key.Contains("go for launch") || key.Contains("green") || key.Contains("success") || key.Contains("launch"))
+            return "Cleared: systems/go — launch expected to proceed.";
+        if (key.Contains("tbc") || key.Contains("to be confirmed") || key.Contains("tbd") || key.Contains("tentative") || key.Contains("planned"))
+            return "To Be Confirmed: details not final yet (time/window tentative).";
+        if (key.Contains("hold") || key.Contains("delayed") || key.Contains("scrub") || key.Contains("failure") || key.Contains("cancelled") || key.Contains("canceled"))
+            return "Delayed/Problem: the launch is on hold, delayed, scrubbed, or cancelled.";
+        return "Status: " + status;
+    }
+}
