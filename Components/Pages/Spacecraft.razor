@@ -1,0 +1,135 @@
+@page "/spacecraft"
+@using spaceTracker.Models
+@using spaceTracker.Services
+@inject SpaceDevsService spaceDevsService
+@rendermode InteractiveServer
+
+<PageTitle>Spacecraft</PageTitle>
+
+
+<h1>Spacecraft</h1>
+
+
+
+<div class="search-sort-bar">
+    <select @bind="sortBy">
+        <option value="name">Sort: Name</option>
+        <option value="type">Sort: Type</option>
+        <option value="config">Sort: Config</option>
+    </select>
+</div>
+
+<div class="spacecraft-stack">
+    @if (isLoading)
+    {
+        <div class="loading"><div class="spinner"></div> Loading spacecraft...</div>
+    }
+    else if (errorMessage != null)
+    {
+        <div class="error-message">⚠️ @errorMessage</div>
+    }
+    else if (FilteredSpacecraft.Any())
+    {
+        <div class="card-container">
+            @foreach (var craft in FilteredSpacecraft)
+            {
+                <div class="spacecraft-card">
+                    <div class="card-content">
+                        <div class="profile-header">
+                            @if (!string.IsNullOrEmpty(craft.Name))
+                            {
+                                <div class="spacecraft-image placeholder">
+                                    <span>@craft.Name[0]</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="spacecraft-image placeholder">
+                                    <span>?</span>
+                                </div>
+                            }
+                            <div class="profile-info">
+                                <h2>@craft.Name</h2>
+                                <p class="serial">Serial: @craft.SerialNumber</p>
+                                <p class="type">Type: @craft.SpacecraftConfig?.Type?.Name</p>
+                                <p class="config">Config: @craft.SpacecraftConfig?.Name</p>
+                                <p class="id">ID: @craft.Id</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="load-more">
+            <button class="load-more-button" @onclick="LoadMore" disabled="@isLoadingMore">@((isLoadingMore ? "Loading..." : "Load More"))</button>
+        </div>
+    }
+    else
+    {
+        <p>No spacecraft found.</p>
+    }
+</div>
+
+@code {
+    private List<spaceTracker.Models.Spacecraft> spacecraftList = new();
+    private bool isLoading = true;
+    private string? errorMessage;
+    private const int PageSize = 50;
+    private int currentOffset = 0;
+    private string searchTerm = string.Empty;
+    private string sortBy = "name";
+    private bool isLoadingMore = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSpacecraft(reset: true);
+    }
+
+    private async Task LoadSpacecraft(bool reset = false)
+    {
+        try
+        {
+            if (reset)
+            {
+                isLoading = true;
+                errorMessage = null;
+                spacecraftList.Clear();
+                currentOffset = 0;
+            }
+            else
+            {
+                isLoadingMore = true;
+            }
+            var list = await spaceDevsService.GetSpacecraftAsync(PageSize, currentOffset);
+            if (list != null && list.Any())
+            {
+                spacecraftList.AddRange(list);
+                currentOffset += PageSize;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+            isLoadingMore = false;
+        }
+    }
+
+    private IEnumerable<spaceTracker.Models.Spacecraft> FilteredSpacecraft =>
+        spacecraftList
+            .Where(craft =>
+                string.IsNullOrWhiteSpace(searchTerm)
+                || (craft.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (craft.SpacecraftConfig?.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (craft.SpacecraftConfig?.Type?.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
+            )
+            .OrderBy(craft => sortBy == "name" ? craft.Name : sortBy == "type" ? craft.SpacecraftConfig?.Type?.Name : craft.SpacecraftConfig?.Name ?? "");
+
+    private async Task LoadMore()
+    {
+        await LoadSpacecraft(reset: false);
+    }
+}
