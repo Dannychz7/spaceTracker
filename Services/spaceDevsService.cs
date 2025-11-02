@@ -451,7 +451,7 @@ public SpaceDevsService(HttpClient httpClient, ILogger<SpaceDevsService> logger,
     #region Spacecraft
     public async Task<List<Spacecraft>> GetSpacecraftAsync(int limit = 10, int offset = 0)
     {
-        var url = $"{BASE_URL}/spacecraft/?limit={limit}&offset={offset}";
+        var url = $"{BASE_URL}/spacecraft/?limit={limit}&offset={offset}&mode=detailed";
         _logger.LogDebug("Fetching spacecraft with URL: {Url}", url);
 
         try

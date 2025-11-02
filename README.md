@@ -54,3 +54,6 @@ Scope for each webpage
 .... IDK pass this point: 
 "/funFacts? "
 
+Attempt db cache for space craft and astronuts?
+Attempt to make a page soley dedicated to the ISS (Basicly half of Raw data) but on its own page
+

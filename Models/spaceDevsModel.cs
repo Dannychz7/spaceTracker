@@ -126,6 +126,9 @@ namespace spaceTracker.Models
         [JsonPropertyName("infographic")]
         public string? Infographic { get; set; }
 
+        [JsonPropertyName("image")]
+        public ProgramImage? Image { get; set; }
+
         [JsonPropertyName("url")]
         public string? Url { get; set; }
     }
@@ -337,8 +340,50 @@ namespace spaceTracker.Models
         [JsonPropertyName("serial_number")]
         public string? SerialNumber { get; set; }
 
+        [JsonPropertyName("image")]
+        public ProgramImage? Image { get; set; }
+
+        [JsonPropertyName("description")]
+        public string? Description { get; set; }
+
         [JsonPropertyName("spacecraft_config")]
         public SpacecraftConfiguration? SpacecraftConfig { get; set; }
+    }
+
+    public class CraftFamily
+    {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
+
+        [JsonPropertyName("description")]
+        public string? Description { get; set; }
+
+        [JsonPropertyName("maiden_flight")]
+        public string? MaidenFlight { get; set; }
+
+        [JsonPropertyName("spacecraft_flown")]
+        public int? SpacecraftFlown { get; set; }
+
+        [JsonPropertyName("total_launch_count")]
+        public int? TotalLaunchCount { get; set; }
+
+        [JsonPropertyName("successful_launches")]
+        public int? SuccessfulLaunches { get; set; }
+
+        [JsonPropertyName("failed_launches")]
+        public int? FailedLaunches { get; set; }
+
+        [JsonPropertyName("attempted_landings")]
+        public int? AttemptedLandings { get; set; }
+
+        [JsonPropertyName("successful_landings")]
+        public int? SuccessfulLandings { get; set; }
+
+        [JsonPropertyName("failed_landings")]
+        public int? FailedLandings { get; set; }
     }
 
     public class SpacecraftConfiguration
@@ -351,6 +396,12 @@ namespace spaceTracker.Models
 
         [JsonPropertyName("type")]
         public SimpleTypeObject? Type { get; set; }
+        
+        [JsonPropertyName("family")]
+        public List<CraftFamily>? Family { get; set; }
+
+        [JsonPropertyName("maiden_flight")]
+        public string? MaidenFlight { get; set; }
     }
 
     public class SpacecraftStage

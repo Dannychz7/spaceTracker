@@ -6,17 +6,40 @@
 
 <PageTitle>Spacecraft</PageTitle>
 
+<h1>Spacecraft Explorer</h1>
 
-<h1>Spacecraft</h1>
-
-
+<div class="stats-bar">
+    <div class="stat-item">
+        <span class="stat-value">@spacecraftList.Count</span>
+        <span class="stat-label">Loaded</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-value">@FilteredSpacecraft.Count()</span>
+        <span class="stat-label">Displayed</span>
+    </div>
+</div>
 
 <div class="search-sort-bar">
-    <select @bind="sortBy">
+    <input type="text"
+           class="search-input"
+           placeholder="Search spacecraft, type, or config..."
+           @bind="searchTerm"
+           @bind:event="oninput" />
+
+    <select @bind="sortBy" class="sort-select">
         <option value="name">Sort: Name</option>
         <option value="type">Sort: Type</option>
         <option value="config">Sort: Config</option>
+        <option value="maiden">Sort: Maiden Flight</option>
     </select>
+
+    <button class="randomize-button" @onclick="ShowRandomSpacecraft" disabled="@(!spacecraftList.Any())">
+        Random
+    </button>
+
+    <button class="view-toggle" @onclick="ToggleView">
+        @(isGridView ? "List" : "Grid")
+    </button>
 </div>
 
 <div class="spacecraft-stack">
@@ -26,47 +49,135 @@
     }
     else if (errorMessage != null)
     {
-        <div class="error-message">⚠️ @errorMessage</div>
+        <div class="error-message"> @errorMessage</div>
     }
     else if (FilteredSpacecraft.Any())
     {
-        <div class="card-container">
+        <div class="@(isGridView ? "card-container" : "list-container")">
             @foreach (var craft in FilteredSpacecraft)
             {
-                <div class="spacecraft-card">
+                <div class="spacecraft-card @(isGridView ? "" : "list-view") @(expandedCardId == craft.Id ? "expanded" : "")"
+                     @onclick="() => ToggleCardExpansion(craft.Id)">
                     <div class="card-content">
                         <div class="profile-header">
-                            @if (!string.IsNullOrEmpty(craft.Name))
+                            @if (!string.IsNullOrEmpty(craft.Image?.ImageUrl))
                             {
-                                <div class="spacecraft-image placeholder">
-                                    <span>@craft.Name[0]</span>
-                                </div>
+                                <img class="spacecraft-image" src="@craft.Image.ImageUrl" alt="@craft.Name" />
                             }
                             else
                             {
                                 <div class="spacecraft-image placeholder">
-                                    <span>?</span>
+                                    <span>@(string.IsNullOrEmpty(craft.Name) ? "?" : craft.Name[0].ToString())</span>
                                 </div>
                             }
+
                             <div class="profile-info">
                                 <h2>@craft.Name</h2>
                                 <p class="serial">Serial: @craft.SerialNumber</p>
-                                <p class="type">Type: @craft.SpacecraftConfig?.Type?.Name</p>
+                                <p class="type">
+                                    <span class="label">Type:</span>
+                                    @if (!string.IsNullOrEmpty(craft.SpacecraftConfig?.Type?.Name))
+                                    {
+                                        <span class="badge">@craft.SpacecraftConfig.Type.Name</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge unknown">Unknown</span>
+                                    }
+                                </p>
                                 <p class="config">Config: @craft.SpacecraftConfig?.Name</p>
-                                <p class="id">ID: @craft.Id</p>
+
+                                @if (expandedCardId != craft.Id && !isGridView)
+                                {
+                                    <p class="id">ID: @craft.Id</p>
+                                }
+                            </div>
+
+                            <div class="expand-icon">
+                                @(expandedCardId == craft.Id ? "▲" : "▼")
                             </div>
                         </div>
+
+                        @if (expandedCardId == craft.Id)
+                        {
+                            <div class="expanded-details">
+                                <div class="detail-section">
+                                    <h3>Description</h3>
+                                    <p>@(string.IsNullOrEmpty(craft.Description) ? "No description available" : craft.Description)</p>
+                                </div>
+
+                                @* MAIDEN FLIGHT SECTION *@
+                                <div class="detail-section">
+                                    <h3>Maiden Flights</h3>
+                                    <p>
+                                        <strong>@(craft.SpacecraftConfig?.Name ?? "Spacecraft") Maiden Flight:</strong>
+                                        @(craft.SpacecraftConfig?.MaidenFlight ?? "Unknown")
+                                    </p>
+                                    @if (craft.SpacecraftConfig?.Family != null && craft.SpacecraftConfig.Family.Any())
+                                    {
+                                        @foreach (var family in craft.SpacecraftConfig.Family)
+                                        {
+                                            @if (!string.IsNullOrEmpty(family.MaidenFlight))
+                                            {
+                                                <p>
+                                                    <strong>@family.Name Family's Maiden Flight:</strong> @family.MaidenFlight
+                                                </p>
+                                            }
+                                        }
+                                    }
+                                </div>
+
+                                @* FAMILY SECTION *@
+                                @if (craft.SpacecraftConfig?.Family != null && craft.SpacecraftConfig.Family.Any())
+                                {
+                                    <div class="detail-section">
+                                        <h3>Family</h3>
+                                        @foreach (var family in craft.SpacecraftConfig.Family)
+                                        {
+                                            <p class="family-name">@family.Name</p>
+                                            @if (!string.IsNullOrEmpty(family.Description))
+                                            {
+                                                <p class="family-description">@family.Description</p>
+                                            }
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="detail-section">
+                                        <h3>Family</h3>
+                                        <p>No family information available.</p>
+                                    </div>
+                                }
+
+                                <div class="detail-section">
+                                    <h3>Technical Info</h3>
+                                    <p><strong>Spacecraft ID:</strong> @craft.Id</p>
+                                    <p><strong>Config ID:</strong> @craft.SpacecraftConfig?.Id</p>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
             }
         </div>
+
         <div class="load-more">
-            <button class="load-more-button" @onclick="LoadMore" disabled="@isLoadingMore">@((isLoadingMore ? "Loading..." : "Load More"))</button>
+            <button class="load-more-button" @onclick="LoadMore" disabled="@isLoadingMore">
+                @(isLoadingMore ? "Loading..." : "Load More Spacecraft")
+            </button>
         </div>
+    }
+    else if (string.IsNullOrWhiteSpace(searchTerm))
+    {
+        <p>No spacecraft found.</p>
     }
     else
     {
-        <p>No spacecraft found.</p>
+        <div class="no-results">
+            <p>No spacecraft match "<strong>@searchTerm</strong>"</p>
+            <button class="clear-search" @onclick="ClearSearch">Clear Search</button>
+        </div>
     }
 </div>
 
@@ -79,6 +190,8 @@
     private string searchTerm = string.Empty;
     private string sortBy = "name";
     private bool isLoadingMore = false;
+    private int? expandedCardId = null;
+    private bool isGridView = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -100,6 +213,7 @@
             {
                 isLoadingMore = true;
             }
+
             var list = await spaceDevsService.GetSpacecraftAsync(PageSize, currentOffset);
             if (list != null && list.Any())
             {
@@ -125,11 +239,38 @@
                 || (craft.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
                 || (craft.SpacecraftConfig?.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
                 || (craft.SpacecraftConfig?.Type?.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (craft.SpacecraftConfig?.Family?.FirstOrDefault()?.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
             )
-            .OrderBy(craft => sortBy == "name" ? craft.Name : sortBy == "type" ? craft.SpacecraftConfig?.Type?.Name : craft.SpacecraftConfig?.Name ?? "");
+            .OrderBy(craft =>
+                sortBy == "name" ? craft.Name :
+                sortBy == "type" ? craft.SpacecraftConfig?.Type?.Name :
+                sortBy == "maiden" ? craft.SpacecraftConfig?.MaidenFlight ?? craft.SpacecraftConfig?.Family?.FirstOrDefault()?.MaidenFlight ?? "9999" :
+                craft.SpacecraftConfig?.Name ?? ""
+            );
 
-    private async Task LoadMore()
+    private async Task LoadMore() => await LoadSpacecraft(reset: false);
+
+    private void ToggleCardExpansion(int craftId)
     {
-        await LoadSpacecraft(reset: false);
+        expandedCardId = expandedCardId == craftId ? null : craftId;
+    }
+
+    private void ShowRandomSpacecraft()
+    {
+        if (spacecraftList.Any())
+        {
+            var random = new Random();
+            var randomCraft = spacecraftList[random.Next(spacecraftList.Count)];
+            expandedCardId = randomCraft.Id;
+            searchTerm = string.Empty;
+        }
+    }
+
+    private void ClearSearch() => searchTerm = string.Empty;
+
+    private void ToggleView()
+    {
+        isGridView = !isGridView;
+        expandedCardId = null;
     }
 }

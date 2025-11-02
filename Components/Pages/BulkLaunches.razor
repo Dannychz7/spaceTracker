@@ -28,17 +28,22 @@
             {
                 <div class="launch-card compact">
                     <div class="launch-thumb">
-                        @if (!string.IsNullOrEmpty(launch.Infographic))
-                        {
-                            <img src="@launch.Infographic" alt="@launch.Name" />
-                        }
-                        else
-                        {
-                            var initialsKey = launch.Provider?.Abbrev ?? launch.Provider?.Name ?? launch.Name;
-                            <div class="thumb-placeholder" style="@GetGradientStyle(initialsKey)">
-                                <span class="thumb-initials">@GetInitials(initialsKey)</span>
-                            </div>
-                        }
+                    @if (launch.Image?.ImageUrl != null)
+                    {
+                        <img src="@launch.Image.ImageUrl" alt="@launch.Name" />
+                    }
+                    else if (!string.IsNullOrEmpty(launch.Infographic))
+                    {
+                        <img src="@launch.Infographic" alt="@launch.Name" />
+                    }
+                    else
+                    {
+                        var initialsKey = launch.Provider?.Abbrev ?? launch.Provider?.Name ?? launch.Name;
+                        <div class="thumb-placeholder" style="@GetGradientStyle(initialsKey)">
+                            <span class="thumb-initials">@GetInitials(initialsKey)</span>
+                        </div>
+                    }
+
                     </div>
 
                     <div class="launch-compact-body">
