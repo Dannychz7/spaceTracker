@@ -449,73 +449,70 @@ public SpaceDevsService(HttpClient httpClient, ILogger<SpaceDevsService> logger,
     #endregion
 
     #region Spacecraft
-public async Task<List<Spacecraft>> GetSpacecraftAsync(int limit = 10, int offset = 0)
-{
-    // 1️⃣ Try fetching from the database first
-    var dbData = await _context.Spacecraft
-        .OrderBy(s => s.Id)
-        .Skip(offset)
-        .Take(limit)
-        .ToListAsync();
-
-    if (dbData.Any())
+    public async Task<List<Spacecraft>> GetSpacecraftAsync(int limit = 10, int offset = 0)
     {
-        _logger.LogDebug("Returning {Count} spacecraft from DB", dbData.Count);
-        return dbData.Select(s => new Spacecraft
+        
+        var dbData = await _context.Spacecraft
+            .OrderBy(s => s.Id)
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
+
+        if (dbData.Any())
         {
-            Id = s.Id,
-            Name = s.Name,
-            SerialNumber = s.SerialNumber,
-            Description = s.Description,
-            Image = s.Image,
-            SpacecraftConfig = s.SpacecraftConfig
-        }).ToList();
-    }
-
-    // 2️⃣ If DB is empty, fetch from API
-    var url = $"{BASE_URL}/spacecraft/?limit={limit}&offset={offset}&mode=detailed";
-    _logger.LogDebug("Fetching spacecraft from API: {Url}", url);
-
-    try
-    {
-        var response = await _httpClient.GetAsync(url);
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
-        _logger.LogDebug("Spacecraft response length: {Length}", content.Length);
-
-        var result = JsonSerializer.Deserialize<SpacecraftResponse>(content, _jsonOptions);
-        var spacecraftList = result?.Results ?? new List<Spacecraft>();
-
-        if (spacecraftList.Any())
-        {
-            // 3️⃣ Save API results to DB
-            var entities = spacecraftList.Select(sc => new SpacecraftEntity
+            _logger.LogDebug("Returning {Count} spacecraft from DB", dbData.Count);
+            return dbData.Select(s => new Spacecraft
             {
-                Id = sc.Id,
-                Name = sc.Name,
-                SerialNumber = sc.SerialNumber,
-                Description = sc.Description,
-                Image = sc.Image,
-                SpacecraftConfig = sc.SpacecraftConfig,
-                CreatedAt = DateTime.UtcNow,
-                LastUpdated = DateTime.UtcNow
+                Id = s.Id,
+                Name = s.Name,
+                SerialNumber = s.SerialNumber,
+                Description = s.Description,
+                Image = s.Image,
+                SpacecraftConfig = s.SpacecraftConfig
             }).ToList();
-
-            await _context.Spacecraft.AddRangeAsync(entities);
-            await _context.SaveChangesAsync();
-            _logger.LogDebug("Saved {Count} spacecraft to DB", entities.Count);
         }
 
-        return spacecraftList;
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error fetching spacecraft from API");
-        return new List<Spacecraft>();
-    }
-}
+        var url = $"{BASE_URL}/spacecraft/?limit={limit}&offset={offset}&mode=detailed";
+        _logger.LogDebug("Fetching spacecraft from API: {Url}", url);
 
+        try
+        {
+            var response = await _httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            _logger.LogDebug("Spacecraft response length: {Length}", content.Length);
+
+            var result = JsonSerializer.Deserialize<SpacecraftResponse>(content, _jsonOptions);
+            var spacecraftList = result?.Results ?? new List<Spacecraft>();
+
+            if (spacecraftList.Any())
+            {
+                var entities = spacecraftList.Select(sc => new SpacecraftEntity
+                {
+                    Id = sc.Id,
+                    Name = sc.Name,
+                    SerialNumber = sc.SerialNumber,
+                    Description = sc.Description,
+                    Image = sc.Image,
+                    SpacecraftConfig = sc.SpacecraftConfig,
+                    CreatedAt = DateTime.UtcNow,
+                    LastUpdated = DateTime.UtcNow
+                }).ToList();
+
+                await _context.Spacecraft.AddRangeAsync(entities);
+                await _context.SaveChangesAsync();
+                _logger.LogDebug("Saved {Count} spacecraft to DB", entities.Count);
+            }
+
+            return spacecraftList;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching spacecraft from API");
+            return new List<Spacecraft>();
+        }
+    }
 
     public async Task<SpacecraftResponse?> GetSpacecraftSeederAsync(int limit = 610, int offset = 0)
     {
