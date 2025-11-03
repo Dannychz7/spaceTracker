@@ -1,112 +1,156 @@
 .nav-menu-container {
     display: flex;
-    flex-direction: column;
-    height: 100%;
-    color: #e8e8e8;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4rem;
+    height: 80px;
 }
 
-/* Menu Header */
-.menu-header {
-    padding: 30px 24px;
-    border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+.nav-menu-container a {
+    color: #ffffff !important;
+    text-decoration: none !important;
 }
 
-.app-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin: 0;
-    color: #00d9ff;
-    text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
-}
-
-/* Navigation Items */
-.nav-items {
-    flex: 1;
-    padding: 20px 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.nav-link {
+.nav-brand {
     display: flex;
     align-items: center;
-    padding: 16px 24px;
-    color: #e8e8e8;
+}
+
+.brand-link {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #ffffff;
     text-decoration: none;
+    letter-spacing: 0.5px;
+    transition: color 0.2s ease;
+}
+
+.brand-link:hover {
+    color: #00d9ff;
+}
+
+.nav-items {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.nav-link,
+.nav-link:link,
+.nav-link:visited,
+.nav-link:hover,
+.nav-link:active,
+.nav-link:focus {
+    color: #ffffff !important;
+    text-decoration: none !important;
+    padding: 0.75rem 1.75rem;
+    border-radius: 8px;
     transition: all 0.3s ease;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
     position: relative;
-    border-left: 3px solid transparent;
+    background: none;
+    border: none;
+    cursor: pointer;
 }
 
 .nav-link:hover {
-    background: rgba(0, 217, 255, 0.1);
-    color: #00d9ff;
-    border-left-color: #00d9ff;
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
 }
 
 .nav-link.active {
-    background: rgba(0, 217, 255, 0.15);
-    color: #00d9ff;
-    border-left-color: #00d9ff;
-    font-weight: 500;
+    background: rgba(255, 255, 255, 0.2);
 }
 
-.nav-icon {
-    font-size: 1.3rem;
-    margin-right: 16px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
+.nav-dropdown {
+    position: relative;
 }
 
-.nav-text {
-    font-size: 1rem;
-    letter-spacing: 0.3px;
-}
-
-/* Menu Footer Decoration */
-.menu-footer {
-    padding: 20px;
-    border-top: 1px solid rgba(0, 217, 255, 0.2);
+.dropdown-toggle {
     display: flex;
-    justify-content: center;
     align-items: center;
+    gap: 0.25rem;
 }
 
-.cosmic-decoration {
-    height: 60px;
-    background: radial-gradient(circle at 50% 50%, rgba(0, 217, 255, 0.3), transparent 70%);
-    border-radius: 50%;
-    animation: pulse 3s ease-in-out infinite;
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #1a1a2e;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    margin-top: 0.5rem;
 }
 
-@keyframes pulse {
-    0%, 100% {
-        opacity: 0.6;
-        transform: scale(1);
+.nav-dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: block;
+    padding: 0.75rem 1.5rem;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    transition: background 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.dropdown-item:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+.dropdown-item:last-child {
+    border-radius: 0 0 8px 8px;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.dropdown-item.active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 1200px) {
+    .nav-menu-container {
+        padding: 0 2rem;
     }
-    50% {
-        opacity: 1;
-        transform: scale(1.1);
+    
+    .nav-items {
+        gap: 0.5rem;
+    }
+    
+    .nav-link {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
     }
 }
 
-/* Scrollbar Styling */
-.nav-menu-container::-webkit-scrollbar {
-    width: 6px;
-}
-
-.nav-menu-container::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.nav-menu-container::-webkit-scrollbar-thumb {
-    background: rgba(0, 217, 255, 0.3);
-    border-radius: 3px;
-}
-
-.nav-menu-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 217, 255, 0.5);
+@media (max-width: 768px) {
+    .nav-menu-container {
+        padding: 0 1rem;
+    }
+    
+    .brand-link {
+        font-size: 1.2rem;
+    }
+    
+    .nav-items {
+        gap: 0.25rem;
+    }
+    
+    .nav-link {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+    }
 }

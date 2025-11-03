@@ -1,19 +1,9 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
 <div class="page">
-    <div class="hamburger-container">
-        <input type="checkbox" id="menu-toggle" class="menu-toggle" />
-        <label for="menu-toggle" class="hamburger-btn">
-            <span></span>
-            <span></span>
-            <span></span>
-        </label>
-        
-        <div class="menu-backdrop"></div>
-        <div class="menu-overlay">
-            <NavMenu />
-        </div>
-    </div>
+    <header class="top-nav">
+        <NavMenu />
+    </header>
 
     <main>
         <article class="content px-4">

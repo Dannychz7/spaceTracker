@@ -2,8 +2,49 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-a, .btn-link {
+.btn-link {
     color: #006bb7;
+}
+
+.top-nav a,
+.top-nav a:link,
+.top-nav a:visited,
+.top-nav a:active {
+    color: #ffffff !important;
+    text-decoration: none !important;
+}
+
+.top-nav a:hover {
+    color: #ffffff !important;
+    text-decoration: none !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    transform: translateY(-2px) !important;
+}
+
+.top-nav .nav-link {
+    display: inline-block;
+    transition: all 0.3s ease !important;
+}
+
+.top-nav .dropdown-menu {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0.75rem 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    gap: 0.25rem !important;
+}
+
+.top-nav .dropdown-item {
+    display: block !important;
+    width: 100% !important;
+    white-space: nowrap !important;
+    border-left: 3px solid transparent !important;
+    transition: all 0.2s ease !important;
+}
+
+.top-nav .dropdown-item.active {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border-left-color: #00d9ff !important;
 }
 
 .btn-primary {

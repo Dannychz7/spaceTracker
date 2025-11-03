@@ -1,66 +1,43 @@
-﻿<div class="nav-menu-container">
-    <div class="menu-header"></div>
+<div class="nav-menu-container">
+    <div class="nav-brand">
+        <a href="/" class="brand-link">SpaceTracker</a>
+    </div>
 
     <nav class="nav-items">
-        <NavLink class="nav-link" href="" onclick="document.getElementById('menu-toggle').checked = false;">
-            <span class="nav-icon"> </span>
-            <span class="nav-text">Home</span>
-        </NavLink>
+        <NavLink class="nav-link" href="">Home </NavLink>
+        
+        <div class="nav-dropdown">
+            <button class="nav-link dropdown-toggle">Dashboards ▾</button>
+            <div class="dropdown-menu">
+                <NavLink class="dropdown-item" href="3d">3D Dashboard</NavLink>
+                <NavLink class="dropdown-item" href="2d">2D Dashboard</NavLink>
+            </div>
+        </div>
 
-        <NavLink class="nav-link" href="3d" onclick="document.getElementById('menu-toggle').checked = false;">
-            <span class="nav-icon"> </span>
-            <span class="nav-text">3D Dashboard</span>
-        </NavLink>
+        <div class="nav-dropdown">
+            <button class="nav-link dropdown-toggle">Explore ▾</button>
+            <div class="dropdown-menu">
+                <NavLink class="dropdown-item" href="astronauts">Astronauts</NavLink>
+                <NavLink class="dropdown-item" href="spacecraft">Spacecraft</NavLink>
+                <NavLink class="dropdown-item" href="Programs">Programs</NavLink>
+            </div>
+        </div>
 
-        <NavLink class="nav-link" href="2d" onclick="document.getElementById('menu-toggle').checked = false;">
-            <span class="nav-icon"> </span>
-            <span class="nav-text">2D Dashboard</span>
-        </NavLink>
+        <div class="nav-dropdown">
+            <button class="nav-link dropdown-toggle">Launches ▾</button>
+            <div class="dropdown-menu">
+                <NavLink class="dropdown-item" href="launchFive">Launches</NavLink>
+                <NavLink class="dropdown-item" href="bulklaunches">Next 40 Launches</NavLink>
+            </div>
+        </div>
 
-
-        <NavLink class="nav-link" href="astronauts" onclick="document.getElementById('menu-toggle').checked = false;">
-            <span class="nav-icon"> </span>
-            <span class="nav-text">Astronauts</span>
-        </NavLink>
-
-        <NavLink class="nav-link" href="spacecraft" onclick="document.getElementById('menu-toggle').checked = false;">
-            <span class="nav-icon"> </span>
-            <span class="nav-text">Spacecraft</span>
-        </NavLink>
-
-        <NavLink class="nav-link" href="launchFive" onclick="document.getElementById('menu-toggle').checked = false;">
-            <span class="nav-icon"> </span>
-            <span class="nav-text">Launches</span>
-        </NavLink>
-
-        <NavLink class="nav-link" href="bulklaunches" onclick="document.getElementById('menu-toggle').checked = false;">
-            <span class="nav-icon"> </span>
-            <span class="nav-text">Next 40 Launches</span>
-        </NavLink>
-
-        <NavLink class="nav-link" href="Programs" onclick="document.getElementById('menu-toggle').checked = false;">
-            <span class="nav-icon"> </span>
-            <span class="nav-text">Programs</span>
-        </NavLink>
-
-        <NavLink class="nav-link" href="rawData" onclick="document.getElementById('menu-toggle').checked = false;">
-            <span class="nav-icon"> </span>
-            <span class="nav-text">Raw Data</span>
-        </NavLink>
-
-        <NavLink class="nav-link" href="test-spacedevs" onclick="document.getElementById('menu-toggle').checked = false;">
-            <span class="nav-icon"> </span>
-            <span class="nav-text">SpaceDevs Data</span>
-        </NavLink>
-
-        <NavLink class="nav-link" href="Error" onclick="document.getElementById('menu-toggle').checked = false;">
-            <span class="nav-icon"> </span>
-            <span class="nav-text">Error Page</span>
-        </NavLink>
+        <div class="nav-dropdown">
+            <button class="nav-link dropdown-toggle">Site Info ▾</button>
+            <div class="dropdown-menu">
+                <NavLink class="dropdown-item" href="rawData">Raw Data</NavLink>
+                <NavLink class="dropdown-item" href="test-spacedevs">SpaceDevs Data</NavLink>
+                <NavLink class="dropdown-item" href="Error">Error Page</NavLink>
+            </div>
+        </div>
     </nav>
-
-    <div class="menu-footer">
-        <div class="cosmic-decoration"></div>
-        <span class="footer-text">SpaceTracker</span>
-    </div>
 </div>
