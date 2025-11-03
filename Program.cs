@@ -30,12 +30,17 @@ builder.Services.AddScoped<SpaceProgramSeeder>();
 builder.Services.AddDbContext<SpaceTrackerDbContext>(options =>
     options.UseSqlite("Data Source=spaceTracker.db"));
 
+builder.Services.AddScoped<SpacecraftSeeder>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
     var seeder = scope.ServiceProvider.GetRequiredService<SpaceProgramSeeder>();
     await seeder.PopulateAsync();
+
+    var spacecraftSeeder = scope.ServiceProvider.GetRequiredService<SpacecraftSeeder>();
+    await spacecraftSeeder.PopulateAsync();
 }
 
 // Configure the HTTP request pipeline.
