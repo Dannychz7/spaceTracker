@@ -140,10 +140,56 @@ public SpaceDevsService(HttpClient httpClient, ILogger<SpaceDevsService> logger,
     #region Astronauts
     public async Task<List<Astronaut>> GetAstronautsAsync(int limit = 10, int offset = 0, string? search = null)
     {
+        // Try fetching from DB first
+        var dbQuery = _context.Astronauts.AsQueryable();
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            var lowerSearch = search.ToLower();
+            dbQuery = dbQuery.Where(a => a.Name != null && a.Name.ToLower().Contains(lowerSearch));
+        }
+
+        var dbData = await dbQuery
+            .OrderBy(a => a.Id)
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
+
+        if (dbData.Any())
+        {
+            _logger.LogDebug("Returning {Count} astronauts from DB", dbData.Count);
+            return dbData.Select(a => new Astronaut
+            {
+                Id = a.Id,
+                Name = a.Name,
+                Status = a.Status,
+                Type = a.Type,
+                Nationality = a.Nationality,
+                Agency = a.Agency,
+                Image = a.Image,
+                DateOfBirth = a.DateOfBirth,
+                DateOfDeath = a.DateOfDeath,
+                ProfileImageThumbnail = a.ProfileImageThumbnail,
+                ProfileImage = a.ProfileImage,
+                Bio = a.Bio,
+                Twitter = a.Twitter,
+                Instagram = a.Instagram,
+                Wiki = a.Wiki,
+                FirstFlight = a.FirstFlight,
+                LastFlight = a.LastFlight,
+                FlightsCount = a.FlightsCount,
+                LandingsCount = a.LandingsCount,
+                SpacewalksCount = a.SpacewalksCount,
+                TimeInSpace = a.TimeInSpace
+            }).ToList();
+        }
+
+        // If not found in DB, fallback to API
         var url = $"{BASE_URL}/astronauts/?limit={limit}&offset={offset}";
         if (!string.IsNullOrEmpty(search))
             url += $"&search={Uri.EscapeDataString(search)}";
-        _logger.LogDebug("Fetching astronauts with URL: {Url}", url);
+
+        _logger.LogDebug("Fetching astronauts from API: {Url}", url);
 
         try
         {
@@ -151,15 +197,49 @@ public SpaceDevsService(HttpClient httpClient, ILogger<SpaceDevsService> logger,
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
-            _logger.LogDebug("Astronauts response length: {Length}", content.Length);
-
             var result = JsonSerializer.Deserialize<AstronautResponse>(content, _jsonOptions);
-            return result?.Results ?? [];
+            var astronautsList = result?.Results ?? new List<Astronaut>();
+
+            if (astronautsList.Any())
+            {
+                var entities = astronautsList.Select(a => new AstronautEntity
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Status = a.Status,
+                    Type = a.Type,
+                    Nationality = a.Nationality,
+                    Agency = a.Agency,
+                    Image = a.Image,
+                    DateOfBirth = a.DateOfBirth,
+                    DateOfDeath = a.DateOfDeath,
+                    ProfileImageThumbnail = a.ProfileImageThumbnail,
+                    ProfileImage = a.ProfileImage,
+                    Bio = a.Bio,
+                    Twitter = a.Twitter,
+                    Instagram = a.Instagram,
+                    Wiki = a.Wiki,
+                    FirstFlight = a.FirstFlight,
+                    LastFlight = a.LastFlight,
+                    FlightsCount = a.FlightsCount,
+                    LandingsCount = a.LandingsCount,
+                    SpacewalksCount = a.SpacewalksCount,
+                    TimeInSpace = a.TimeInSpace,
+                    CreatedAt = DateTime.UtcNow,
+                    LastUpdated = DateTime.UtcNow
+                }).ToList();
+
+                await _context.Astronauts.AddRangeAsync(entities);
+                await _context.SaveChangesAsync();
+                _logger.LogDebug("Saved {Count} astronauts to DB", entities.Count);
+            }
+
+            return astronautsList;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching astronauts");
-            return [];
+            _logger.LogError(ex, "Error fetching astronauts from API");
+            return new List<Astronaut>();
         }
     }
 
@@ -182,6 +262,20 @@ public SpaceDevsService(HttpClient httpClient, ILogger<SpaceDevsService> logger,
             return null;
         }
     }
+
+    public async Task<AstronautResponse?> GetAstronautSeederAsync(int limit = 100, int offset = 0)
+    {
+        var url = $"https://lldev.thespacedevs.com/2.3.0/astronauts/?limit={limit}&offset={offset}";
+        _logger.LogDebug("Fetching astronauts with URL: {Url}", url);
+
+        var response = await _httpClient.GetAsync(url);
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        var json = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<AstronautResponse>(json, _jsonOptions);
+    }
+
     #endregion
 
     #region Spacewalks
