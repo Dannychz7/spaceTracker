@@ -33,6 +33,8 @@ builder.Services.AddDbContext<SpaceTrackerDbContext>(options =>
 builder.Services.AddScoped<SpacecraftSeeder>();
 builder.Services.AddScoped<AstronautSeeder>();
 
+builder.Services.AddHostedService<spaceTracker.BackgroundServices.CacheRefresherService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
