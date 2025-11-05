@@ -1,6 +1,9 @@
 @page "/spacecraft"
 @using spaceTracker.Models
 @using spaceTracker.Services
+@using Microsoft.EntityFrameworkCore
+
+@inject spaceTracker.Data.SpaceTrackerDbContext _context
 @inject SpaceDevsService spaceDevsService
 @rendermode InteractiveServer
 
@@ -8,6 +11,7 @@
 
 <h1>Spacecraft Explorer</h1>
 
+<!-- Stats Bar -->
 <div class="stats-bar">
     <div class="stat-item">
         <span class="stat-value">@spacecraftList.Count</span>
@@ -19,6 +23,7 @@
     </div>
 </div>
 
+<!-- Search / Sort / SQL Bar -->
 <div class="search-sort-bar">
     <input type="text"
            class="search-input"
@@ -33,15 +38,52 @@
         <option value="maiden">Sort: Maiden Flight</option>
     </select>
 
-    <button class="randomize-button" @onclick="ShowRandomSpacecraft" disabled="@(!spacecraftList.Any())">
-        Random
-    </button>
+    <textarea class="query-box"
+              placeholder="Run a SQL query (e.g. SELECT Name, SerialNumber FROM spacecraft LIMIT 10)"
+              @bind="sqlQuery"
+              rows="6"></textarea>
 
-    <button class="view-toggle" @onclick="ToggleView">
-        @(isGridView ? "List" : "Grid")
-    </button>
+    <div class="query-buttons">
+        <button class="run-query-button" @onclick="RunSqlQuery">Run Query</button>
+        <button class="randomize-button" @onclick="ShowRandomSpacecraft" disabled="@(!spacecraftList.Any())">Random</button>
+        <button class="view-toggle" @onclick="ToggleView">@(isGridView ? "List" : "Grid")</button>
+    </div>
 </div>
 
+<!-- Query Results -->
+@if (queryError != null)
+{
+    <div class="error-message">@queryError</div>
+}
+else if (queryResults != null)
+{
+    <div class="query-results">
+        <h3>Query Results (@queryResults.Count rows)</h3>
+        <table>
+            <thead>
+                <tr>
+                    @foreach (var col in queryResults.FirstOrDefault()?.Keys ?? Enumerable.Empty<string>())
+                    {
+                        <th>@col</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in queryResults)
+                {
+                    <tr>
+                        @foreach (var val in row.Values)
+                        {
+                            <td>@(val?.ToString() ?? "NULL")</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<!-- Spacecraft Grid/List -->
 <div class="spacecraft-stack">
     @if (isLoading)
     {
@@ -49,7 +91,7 @@
     }
     else if (errorMessage != null)
     {
-        <div class="error-message"> @errorMessage</div>
+        <div class="error-message">@errorMessage</div>
     }
     else if (FilteredSpacecraft.Any())
     {
@@ -106,28 +148,22 @@
                                     <p>@(string.IsNullOrEmpty(craft.Description) ? "No description available" : craft.Description)</p>
                                 </div>
 
-                                @* MAIDEN FLIGHT SECTION *@
                                 <div class="detail-section">
                                     <h3>Maiden Flights</h3>
-                                    <p>
-                                        <strong>@(craft.SpacecraftConfig?.Name ?? "Spacecraft") Maiden Flight:</strong>
-                                        @(craft.SpacecraftConfig?.MaidenFlight ?? "Unknown")
-                                    </p>
+                                    <p><strong>@(craft.SpacecraftConfig?.Name ?? "Spacecraft") Maiden Flight:</strong> @(craft.SpacecraftConfig?.MaidenFlight ?? "Unknown")</p>
+
                                     @if (craft.SpacecraftConfig?.Family != null && craft.SpacecraftConfig.Family.Any())
                                     {
                                         @foreach (var family in craft.SpacecraftConfig.Family)
                                         {
                                             @if (!string.IsNullOrEmpty(family.MaidenFlight))
                                             {
-                                                <p>
-                                                    <strong>@family.Name Family's Maiden Flight:</strong> @family.MaidenFlight
-                                                </p>
+                                                <p><strong>@family.Name Family's Maiden Flight:</strong> @family.MaidenFlight</p>
                                             }
                                         }
                                     }
                                 </div>
 
-                                @* FAMILY SECTION *@
                                 @if (craft.SpacecraftConfig?.Family != null && craft.SpacecraftConfig.Family.Any())
                                 {
                                     <div class="detail-section">
@@ -193,10 +229,11 @@
     private int? expandedCardId = null;
     private bool isGridView = true;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadSpacecraft(reset: true);
-    }
+    private string sqlQuery = string.Empty;
+    private List<Dictionary<string, object>>? queryResults = null;
+    private string? queryError = null;
+
+    protected override async Task OnInitializedAsync() => await LoadSpacecraft(reset: true);
 
     private async Task LoadSpacecraft(bool reset = false)
     {
@@ -221,15 +258,8 @@
                 currentOffset += PageSize;
             }
         }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
-        finally
-        {
-            isLoading = false;
-            isLoadingMore = false;
-        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+        finally { isLoading = false; isLoadingMore = false; }
     }
 
     private IEnumerable<spaceTracker.Models.Spacecraft> FilteredSpacecraft =>
@@ -239,38 +269,77 @@
                 || (craft.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
                 || (craft.SpacecraftConfig?.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
                 || (craft.SpacecraftConfig?.Type?.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
-                || (craft.SpacecraftConfig?.Family?.FirstOrDefault()?.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
-            )
+                || (craft.SpacecraftConfig?.Family?.FirstOrDefault()?.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false))
             .OrderBy(craft =>
                 sortBy == "name" ? craft.Name :
                 sortBy == "type" ? craft.SpacecraftConfig?.Type?.Name :
                 sortBy == "maiden" ? craft.SpacecraftConfig?.MaidenFlight ?? craft.SpacecraftConfig?.Family?.FirstOrDefault()?.MaidenFlight ?? "9999" :
-                craft.SpacecraftConfig?.Name ?? ""
-            );
+                craft.SpacecraftConfig?.Name ?? "");
 
     private async Task LoadMore() => await LoadSpacecraft(reset: false);
-
-    private void ToggleCardExpansion(int craftId)
-    {
-        expandedCardId = expandedCardId == craftId ? null : craftId;
-    }
-
-    private void ShowRandomSpacecraft()
-    {
-        if (spacecraftList.Any())
-        {
-            var random = new Random();
-            var randomCraft = spacecraftList[random.Next(spacecraftList.Count)];
-            expandedCardId = randomCraft.Id;
-            searchTerm = string.Empty;
-        }
-    }
-
+    private void ToggleCardExpansion(int craftId) => expandedCardId = expandedCardId == craftId ? null : craftId;
+    private void ShowRandomSpacecraft() { if (spacecraftList.Any()) { var random = new Random(); expandedCardId = spacecraftList[random.Next(spacecraftList.Count)].Id; searchTerm = string.Empty; } }
     private void ClearSearch() => searchTerm = string.Empty;
+    private void ToggleView() { isGridView = !isGridView; expandedCardId = null; }
 
-    private void ToggleView()
+private async Task RunSqlQuery()
     {
-        isGridView = !isGridView;
-        expandedCardId = null;
+        queryError = null;
+        queryResults = null;
+        if (string.IsNullOrWhiteSpace(sqlQuery)) { queryError = "Please enter a SQL query."; return; }
+
+        // Security check: only allow SELECT queries
+        var trimmedQuery = sqlQuery.Trim();
+        if (!trimmedQuery.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
+        {
+            queryError = "Only SELECT queries are allowed for safety.";
+            return;
+        }
+
+        // Additional safety: block dangerous keywords
+        var dangerousKeywords = new[] { "INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "TRUNCATE", "EXEC", "EXECUTE" };
+        var upperQuery = trimmedQuery.ToUpperInvariant();
+        if (dangerousKeywords.Any(keyword => upperQuery.Contains(keyword)))
+        {
+            queryError = "Query contains forbidden keywords. Only SELECT queries are allowed.";
+            return;
+        }
+
+        try
+        {
+            using var connection = _context.Database.GetDbConnection();
+            await connection.OpenAsync();
+
+            using var command = connection.CreateCommand();
+            command.CommandText = sqlQuery;
+            command.CommandTimeout = 30; // 30 second timeout for safety
+
+            using var reader = await command.ExecuteReaderAsync(System.Data.CommandBehavior.SequentialAccess);
+            var results = new List<Dictionary<string, object>>();
+            
+            while (await reader.ReadAsync())
+            {
+                var row = new Dictionary<string, object>();
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    var value = reader.IsDBNull(i) ? null : reader.GetValue(i);
+                    row[reader.GetName(i)] = value ?? DBNull.Value;
+                }
+                results.Add(row);
+                
+                // Limit results to prevent memory issues
+                if (results.Count >= 1000)
+                {
+                    queryError = "Query returned more than 1000 rows (truncated for display).";
+                    break;
+                }
+            }
+            
+            queryResults = results;
+        }
+        catch (Exception ex) 
+        { 
+            queryError = $"Query error: {ex.Message}"; 
+        }
     }
 }

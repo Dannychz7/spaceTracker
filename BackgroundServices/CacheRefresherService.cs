@@ -47,7 +47,7 @@ namespace spaceTracker.BackgroundServices
                 }
 
                 // Wait 10 minutes before next refresh
-                await Task.Delay(TimeSpan.FromMinutes(.5), stoppingToken);
+                await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken); //change to 0.5 when demoing to show true cache refresh
             }
         }
 
