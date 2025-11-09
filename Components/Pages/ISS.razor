@@ -490,7 +490,7 @@
         }
     } *@
 
-    private double CelsiusToFahrenheit(double celsius) {return (celsius * 9 / 5) + 32;}
+    private double CelsiusToFahrenheit(double celsius) {double val = (celsius * 9 / 5) + 32; return Math.Round(val,2);}
 
     private async Task LoadAllData()
     {

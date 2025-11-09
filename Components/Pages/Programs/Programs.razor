@@ -79,24 +79,4 @@
             </div>
         }
     </div>
-
-    @if (!isLoading && errorMessage == null)
-    {
-        <button class="load-more" @onclick="LoadNextBatchAsync">Load More</button>
-    }
-
-    @if (isLoading && programs.Count > 0)
-    {
-        <div class="loading-more">
-            <div class="spinner-small"></div>
-            <p>Loading more programs...</p>
-        </div>
-    }
-
-    @if (errorMessage != null)
-    {
-        <div class="error-message">
-            <p>⚠️ @errorMessage</p>
-        </div>
-    }
 </div>

@@ -1,208 +1,131 @@
-@page "/rawData"
+@page "/rawdata"
 @using spaceTracker.Models
 @using spaceTracker.Services
+@using System.Text.Json
 @inject weatherService weatherService
 @inject RocketLaunchLiveService rocketLaunchService
 @inject n2yoService n2yoService
-@inject SpaceDevsService spaceDevsService
 
-<PageTitle>Raw Data For APIs</PageTitle>
+<PageTitle>Raw API Data - Pure JSON</PageTitle>
 
-<h1>Weather Data (Boston, MA)</h1>
+<h1>Raw API Data Display</h1>
+<p>Pure JSON responses from backend services</p>
+
+<hr />
+
+<!-- Weather API Section -->
+<h2>Weather API (Boston, MA)</h2>
+<p><strong>Service:</strong> weatherService.GetWeatherData()</p>
+<p><strong>Status:</strong> @(weatherData != null ? "> Loaded" : "Loading...")</p>
 
 @if (weatherData != null)
 {
-    <p>Temperature: @weatherData.Current?.Temperature_2m °C</p>
-    <p>Wind Speed: @weatherData.Current?.WindSpeed_10m km/h</p>
-    <p>Time: @weatherData.Current?.Time UTC</p>
-}
-else
-{
-    <p>Loading weather data...</p>
+    <pre style="background: #f4f4f4; padding: 10px; overflow-x: auto;">@SerializeToJson(weatherData)</pre>
 }
 
-<h1>Upcoming Rocket Launches</h1>
+<hr />
 
-@if (rocketData != null && rocketData.Any())
+<!-- Rocket Launch API Section -->
+<h2>Rocket Launch API</h2>
+<p><strong>Service:</strong> RocketLaunchLiveService.GetUpcomingLaunches()</p>
+<p><strong>Status:</strong> @(rocketData != null ? $"> Loaded ({rocketData.Count} items)" : "Loading...")</p>
+
+@if (rocketData != null)
 {
-    <ul>
-        @foreach (var launch in rocketData)
-        {
-            <li>
-                <strong>Mission:</strong> @launch.Name<br />
-                <strong>Provider:</strong> @(launch.Provider?.Name ?? "Unknown")<br />
-                <strong>Launch Time:</strong> @(
-                    (launch.Win_open?.ToString("u")) 
-                    ?? (launch.T0?.ToString("u")) 
-                    ?? launch.date_str 
-                    ?? "N/A"
-                )<br />
-                <strong>Pad:</strong> @(launch.Pad?.Name ?? "Unknown")<br />
-                <strong>Vehicle:</strong> @(launch.Vehicle?.Name ?? "Unknown")<br />
-                <strong>Pad Location:</strong> 
-                @(launch.Pad?.Location?.Name ?? "Unknown"), 
-                @(launch.Pad?.Location?.Country ?? "Unknown")<br />
-                <strong>Description:</strong> @(launch.LaunchDescription ?? "No description available")
-            </li>
-        }
-    </ul>
-}
-else
-{
-    <p>Loading rocket launch data...</p>
+    <pre style="background: #f4f4f4; padding: 10px; overflow-x: auto;">@SerializeToJson(rocketData)</pre>
 }
 
-<h1>Fun Satellite Information</h1>
+<hr />
+
+<!-- ISS Position API Section -->
+<h2>ISS Position API</h2>
+<p><strong>Service:</strong> n2yoService.GetISSPosition()</p>
+<p><strong>Parameters:</strong> lat=42.2626, lng=-71.8023, alt=0</p>
+<p><strong>Status:</strong> @(issPosition != null ? "> Loaded" : "Loading...")</p>
 
 @if (issPosition != null)
 {
-    <h3> International Space Station (ISS)</h3>
-    <p><strong>Current Location:</strong> @issPosition.Positions?.FirstOrDefault()?.Satlatitude.ToString("F2")°, @issPosition.Positions?.FirstOrDefault()?.Satlongitude.ToString("F2")°</p>
-    <p><strong>Altitude:</strong> @issPosition.Positions?.FirstOrDefault()?.Sataltitude.ToString("F2") km above Earth</p>
-    <p><strong>Your View:</strong> 
-        @if (issPosition.Positions?.FirstOrDefault()?.Elevation > 0)
-        {
-            <span style="color: green;">Visible! Look @GetCompassDirection(issPosition.Positions.FirstOrDefault()?.Azimuth ?? 0) at @issPosition.Positions?.FirstOrDefault()?.Elevation.ToString("F1")° elevation 🌟</span>
-        }
-        else
-        {
-            <span>Below horizon (@issPosition.Positions?.FirstOrDefault()?.Elevation.ToString("F1")°)</span>
-        }
-    </p>
-    <p><strong>Right Ascension:</strong> @issPosition.Positions?.FirstOrDefault()?.Ra.ToString("F2")° | <strong>Declination:</strong> @issPosition.Positions?.FirstOrDefault()?.Dec.ToString("F2")°</p>
-}
-else
-{
-    <p>Loading ISS data...</p>
+    <pre style="background: #f4f4f4; padding: 10px; overflow-x: auto;">@SerializeToJson(issPosition)</pre>
 }
 
-@if (satellitesAbove != null && satellitesAbove.Above != null)
+<hr />
+
+<!-- Satellites Above Section -->
+<h2>Satellites Above Observer</h2>
+<p><strong>Service:</strong> n2yoService.GetSatellitesAbove()</p>
+<p><strong>Parameters:</strong> lat=42.2626, lng=-71.8023, alt=0, searchRadius=70, categoryId=0</p>
+<p><strong>Status:</strong> @(satellitesAbove != null ? $"> Loaded ({satellitesAbove.Above?.Count ?? 0} satellites)" : "Loading...")</p>
+
+@if (satellitesAbove != null)
 {
-    <h3> Satellites Currently Overhead (Worcester, MA)</h3>
-    <p><strong>Count:</strong> @satellitesAbove.Above.Count satellite(s) visible in the sky right now!</p>
-    <ul>
-        @foreach (var sat in satellitesAbove.Above.Take(10))
-        {
-            <li>
-                <strong>@sat.Satname</strong> (ID: @sat.Satid)<br />
-                Altitude: @sat.Satalt.ToString("F1") km | 
-                Position: @sat.Satlat.ToString("F2")°, @sat.Satlng.ToString("F2")° | 
-                Launched: @sat.Launchdate | 
-                Designator: @sat.Intdesignator
-            </li>
-        }
-    </ul>
-    @if (satellitesAbove.Above.Count > 10)
-    {
-        <p><em>...and @(satellitesAbove.Above.Count - 10) more!</em></p>
-    }
-}
-else
-{
-    <p>Loading overhead satellites...</p>
+    <pre style="background: #f4f4f4; padding: 10px; overflow-x: auto;">@SerializeToJson(satellitesAbove)</pre>
 }
 
-@if (issVisualPasses != null && issVisualPasses.Passes != null && issVisualPasses.Passes.Any())
-{
-    <h3> Next ISS Visual Sighting Opportunities</h3>
-    <p>When you can see the ISS with your naked eye from Worcester, MA:</p>
-    <ul>
-        @foreach (var pass in issVisualPasses.Passes.Take(3))
-        {
-            var startTime = DateTimeOffset.FromUnixTimeSeconds(pass.StartUTC).ToLocalTime();
-            var maxTime = DateTimeOffset.FromUnixTimeSeconds(pass.MaxUTC).ToLocalTime();
-            var endTime = DateTimeOffset.FromUnixTimeSeconds(pass.EndUTC).ToLocalTime();
-            var duration = pass.Duration / 60;
-            <li>
-                <strong>@startTime.ToString("ddd, MMM dd @ h:mm tt")</strong><br />
-                Duration: @duration min @(duration > 5 ? "" : "") | 
-                Max Elevation: @pass.MaxEl.ToString("F1")° @(pass.MaxEl > 60 ? "(Excellent!)" : pass.MaxEl > 30 ? "(Good)" : "")<br />
-                Brightness: @pass.Mag magnitude (brighter = more negative)<br />
-                <strong>Path:</strong> Rise @pass.StartAzCompass (@pass.StartAz.ToString("F1")°) → 
-                Peak @pass.MaxAzCompass (@pass.MaxAz.ToString("F1")°) → 
-                Set @pass.EndAzCompass (@pass.EndAz.ToString("F1")°)<br />
-                <strong>Times:</strong> Start: @startTime.ToString("h:mm:ss tt") | Peak: @maxTime.ToString("h:mm:ss tt") | End: @endTime.ToString("h:mm:ss tt")
-            </li>
-        }
-    </ul>
-}
-else if (issVisualPasses != null)
-{
-    <p>No visible ISS passes in the next 10 days </p>
-}
-else
-{
-    <p>Loading ISS sighting times...</p>
-}
+<hr />
 
-@if (issRadioPasses != null && issRadioPasses.Passes != null && issRadioPasses.Passes.Any())
-{
-    <h3> ISS Radio Communication Windows</h3>
-    <p>Amateur radio operators can contact the ISS during these times:</p>
-    <ul>
-        @foreach (var pass in issRadioPasses.Passes.Take(3))
-        {
-            var startTime = DateTimeOffset.FromUnixTimeSeconds(pass.StartUTC).ToLocalTime();
-            var maxTime = DateTimeOffset.FromUnixTimeSeconds(pass.MaxUTC).ToLocalTime();
-            var endTime = DateTimeOffset.FromUnixTimeSeconds(pass.EndUTC).ToLocalTime();
-            <li>
-                <strong>@startTime.ToString("ddd, MMM dd @ h:mm tt")</strong><br />
-                Max Elevation: @pass.MaxEl.ToString("F1")° @(pass.MaxEl > 45 ? "(Great signal!)" : "")<br />
-                <strong>Path:</strong> @pass.StartAzCompass (@pass.StartAz.ToString("F1")°) → 
-                @pass.MaxAzCompass (@pass.MaxAz.ToString("F1")°) → 
-                @pass.EndAzCompass (@pass.EndAz.ToString("F1")°)<br />
-                Window: @startTime.ToString("h:mm tt") to @endTime.ToString("h:mm tt")
-            </li>
-        }
-    </ul>
-    <p><em>ISS Ham Radio: Downlink 145.800 MHz | Uplink 144.490 MHz</em></p>
-}
-else
-{
-    <p>Loading radio passes...</p>
-}
-
-@if (issTLE != null)
-{
-    <h3> ISS Orbital Elements (TLE Data)</h3>
-    <p><strong>Satellite:</strong> @issTLE.Info?.Satname (ID: @issTLE.Info?.Satid)</p>
-    <p><strong>TLE Data:</strong></p>
-    <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;">@issTLE.Tle</pre>
-    @if (!string.IsNullOrEmpty(issTLE.Tle))
-    {
-        var lines = issTLE.Tle.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-        if (lines.Length >= 2)
-        {
-            <p><strong>Quick Stats from TLE:</strong></p>
-            <ul>
-                <li>Epoch Year/Day: @lines[0].Substring(18, 14) (when this data was calculated)</li>
-                <li>Inclination: @lines[1].Substring(8, 8).Trim()° (orbit angle to equator)</li>
-                <li>Eccentricity: 0.@lines[1].Substring(26, 7) (how circular the orbit is)</li>
-                <li>Mean Motion: @lines[1].Substring(52, 11).Trim() revolutions/day (how many times it orbits Earth daily)</li>
-            </ul>
-        }
-    }
-}
-else
-{
-    <p>Loading TLE data...</p>
-}
+<!-- Hubble Position -->
+<h2>Hubble Space Telescope Position</h2>
+<p><strong>Service:</strong> n2yoService.GetSatellitePosition()</p>
+<p><strong>Parameters:</strong> satelliteId=20580, lat=42.2626, lng=-71.8023, alt=0</p>
+<p><strong>Status:</strong> @(hubblePosition != null ? "> Loaded" : "Loading...")</p>
 
 @if (hubblePosition != null)
 {
-    <h3> Hubble Space Telescope</h3>
-    <p><strong>Location:</strong> @hubblePosition.Positions?.FirstOrDefault()?.Satlatitude.ToString("F2")°, @hubblePosition.Positions?.FirstOrDefault()?.Satlongitude.ToString("F2")°</p>
-    <p><strong>Altitude:</strong> @hubblePosition.Positions?.FirstOrDefault()?.Sataltitude.ToString("F2") km (orbiting since April 1990!)</p>
-    <p><strong>Elevation from you:</strong> @hubblePosition.Positions?.FirstOrDefault()?.Elevation.ToString("F1")° | <strong>Azimuth:</strong> @GetCompassDirection(hubblePosition.Positions?.FirstOrDefault()?.Azimuth ?? 0)</p>
+    <pre style="background: #f4f4f4; padding: 10px; overflow-x: auto;">@SerializeToJson(hubblePosition)</pre>
 }
-else
+
+<hr />
+
+<!-- ISS Visual Passes -->
+<h2>ISS Visual Passes</h2>
+<p><strong>Service:</strong> n2yoService.GetVisualPasses()</p>
+<p><strong>Parameters:</strong> satelliteId=25544, lat=42.2626, lng=-71.8023, alt=0, days=10, minVisibility=300</p>
+<p><strong>Status:</strong> @(issVisualPasses != null ? $"> Loaded ({issVisualPasses.Passes?.Count ?? 0} passes)" : "Loading...")</p>
+
+@if (issVisualPasses != null)
 {
-    <p>Loading Hubble data...</p>
+    <pre style="background: #f4f4f4; padding: 10px; overflow-x: auto;">@SerializeToJson(issVisualPasses)</pre>
 }
 
-<h1>SpaceDevs API Test Results</h1>
+<hr />
 
+<!-- ISS Radio Passes -->
+<h2>ISS Radio Passes</h2>
+<p><strong>Service:</strong> n2yoService.GetRadioPasses()</p>
+<p><strong>Parameters:</strong> satelliteId=25544, lat=42.2626, lng=-71.8023, alt=0, days=5, minElevation=10</p>
+<p><strong>Status:</strong> @(issRadioPasses != null ? $"> Loaded ({issRadioPasses.Passes?.Count ?? 0} passes)" : "Loading...")</p>
 
+@if (issRadioPasses != null)
+{
+    <pre style="background: #f4f4f4; padding: 10px; overflow-x: auto;">@SerializeToJson(issRadioPasses)</pre>
+}
+
+<hr />
+
+<!-- ISS TLE Data -->
+<h2>ISS TLE (Two-Line Element) Data</h2>
+<p><strong>Service:</strong> n2yoService.GetSatelliteTLE()</p>
+<p><strong>Parameters:</strong> satelliteId=25544</p>
+<p><strong>Status:</strong> @(issTLE != null ? "> Loaded" : "Loading...")</p>
+
+@if (issTLE != null)
+{
+    <pre style="background: #f4f4f4; padding: 10px; overflow-x: auto;">@SerializeToJson(issTLE)</pre>
+}
+
+<hr />
+
+<h2>Backend Execution Summary</h2>
+<pre style="background: #f4f4f4; padding: 10px;">
+Total Services Called: 8
+Execution Method: Task.WhenAll() - Parallel Async
+Location: Worcester, MA (42.2626°N, 71.8023°W)
+
+Services:
+  > weatherService
+  > RocketLaunchLiveService  
+  > n2yoService (6 different endpoints)
+</pre>
 
 @code {
     private weatherResponse? weatherData;
@@ -221,10 +144,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        // Boston coordinates for weather
         double bostonLat = 42.3601;
         double bostonLng = -71.0589;
 
-        // Launch all API calls in parallel for maximum efficiency
+        // Execute all API calls in parallel
         var weatherTask = weatherService.GetWeatherData(bostonLat, bostonLng);
         var rocketTask = rocketLaunchService.GetUpcomingLaunches();
         var issTask = n2yoService.GetISSPosition(worcesterLat, worcesterLng, worcesterAlt);
@@ -234,8 +158,10 @@ else
         var radioPassesTask = n2yoService.GetRadioPasses(25544, worcesterLat, worcesterLng, worcesterAlt, 5, 10);
         var tleTask = n2yoService.GetSatelliteTLE(25544);
 
+        // Wait for all tasks to complete
         await Task.WhenAll(weatherTask, rocketTask, issTask, hubbleTask, satellitesTask, visualPassesTask, radioPassesTask, tleTask);
 
+        // Assign results
         weatherData = await weatherTask;
         rocketData = await rocketTask;
         issPosition = await issTask;
@@ -246,10 +172,13 @@ else
         issTLE = await tleTask;
     }
 
-    private string GetCompassDirection(double azimuth)
+    private string SerializeToJson(object obj)
     {
-        var directions = new[] { "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW" };
-        var index = (int)Math.Round(azimuth / 22.5) % 16;
-        return directions[index];
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+        return JsonSerializer.Serialize(obj, options);
     }
 }

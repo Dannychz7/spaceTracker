@@ -35,9 +35,7 @@
     gap: 12px;
     margin: 20px 20px 10px 20px;
     align-items: center;
-    justify-content: flex-start;
     max-width: 1200px;
-    flex-wrap: wrap;
 }
 
 .search-input {
@@ -70,31 +68,145 @@
     border-color: #667eea;
 }
 
+/* SQL Query Section */
+.sql-query-section {
+    margin: 10px 20px 20px 20px;
+    max-width: 1200px;
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 12px;
+    border: 2px solid #e0e0e0;
+}
+
+.sql-query-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.sql-query-header h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #495057;
+    font-weight: 600;
+}
+
+.sql-query-content {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 899px) {
+    .sql-query-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+.sql-query-input {
+    display: flex;
+    flex-direction: column;
+}
+
+.sql-examples {
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.sql-examples h4 {
+    margin: 0 0 8px 0;
+    font-size: 0.85rem;
+    color: #667eea;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.db-name {
+    font-family: 'Courier New', monospace;
+    background: #e7f3ff;
+    color: #0066cc;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-bottom: 12px;
+}
+
+.example-query {
+    background: #1e1e1e;
+    color: #e0e0e0;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid #333;
+}
+
+.example-query:hover {
+    background: #2a2a2a;
+    border-color: #667eea;
+    transform: translateX(2px);
+}
+
+.example-query:last-child {
+    margin-bottom: 0;
+}
+
 .query-box {
     width: 100%;
-    max-width: 600px;
-    font-family: monospace;
-    font-size: 14px;
-    padding: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    padding: 12px;
     border-radius: 8px;
-    border: 1px solid #ccc;
+    border: 2px solid #dee2e6;
     background-color: #1e1e1e;
     color: #e0e0e0;
     resize: vertical;
-    margin-top: 10px;
+    min-height: 80px;
+    line-height: 1.5;
+    transition: border-color 0.3s ease;
+}
+
+.query-box:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.query-box::placeholder {
+    color: #888;
+}
+
+.query-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
 }
 
 .run-query-button {
-    margin-left: 10px;
-    padding: 8px 16px;
+    padding: 10px 20px;
     border-radius: 8px;
     border: none;
     background-color: #4caf50;
     color: white;
     cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
+
 .run-query-button:hover {
     background-color: #43a047;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
 .randomize-button, .view-toggle {

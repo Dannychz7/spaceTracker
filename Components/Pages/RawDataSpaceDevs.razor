@@ -9,7 +9,7 @@
 
 <PageTitle>SpaceDevs Service Test Harness</PageTitle>
 
-<h1>🚀 SpaceDevs Service Test Harness</h1>
+<h1> SpaceDevs Service Test Harness</h1>
 <p>
     This page calls every method in the <code>SpaceDevsService</code> to verify that the API calls and JSON deserialization are working correctly.
 </p>
@@ -79,11 +79,11 @@ private async Task RunAllTestsAsync()
         await TestLauncherConfigurationsAsync();
         await TestLocationsAndPadsAsync();
 
-        AddLog("<strong>✅ All tests completed!</strong>", true);
+        AddLog("<strong> All tests completed!</strong>", true);
     }
     catch (Exception ex)
     {
-        AddLog($"<strong>❌ Critical failure:</strong> {ex.Message}", false);
+        AddLog($"<strong> Critical failure:</strong> {ex.Message}", false);
     }
     finally
     {

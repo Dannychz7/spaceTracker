@@ -1,5 +1,6 @@
 @page "/spacecraft"
 @using spaceTracker.Models
+@using System.Text.RegularExpressions;
 @using spaceTracker.Services
 @using Microsoft.EntityFrameworkCore
 
@@ -23,7 +24,7 @@
     </div>
 </div>
 
-<!-- Search / Sort / SQL Bar -->
+<!-- Search and Sort Bar -->
 <div class="search-sort-bar">
     <input type="text"
            class="search-input"
@@ -38,22 +39,53 @@
         <option value="maiden">Sort: Maiden Flight</option>
     </select>
 
-    <textarea class="query-box"
-              placeholder="Run a SQL query (e.g. SELECT Name, SerialNumber FROM spacecraft LIMIT 10)"
-              @bind="sqlQuery"
-              rows="6"></textarea>
+    <button class="view-toggle" @onclick="ToggleView">
+        @(isGridView ? "List View" : "Grid View")
+    </button>
+</div>
 
-    <div class="query-buttons">
-        <button class="run-query-button" @onclick="RunSqlQuery">Run Query</button>
-        <button class="randomize-button" @onclick="ShowRandomSpacecraft" disabled="@(!spacecraftList.Any())">Random</button>
-        <button class="view-toggle" @onclick="ToggleView">@(isGridView ? "List" : "Grid")</button>
+<!-- SQL Query Section -->
+<div class="sql-query-section">
+    <div class="sql-query-header">
+        <h3> SQL Query Console</h3>
+    </div>
+    
+    <div class="sql-query-content">
+        <div class="sql-query-input">
+            <textarea class="query-box"
+                      placeholder="SELECT Name, SerialNumber FROM spacecraft WHERE Type = 'Crew Dragon' LIMIT 10"
+                      @bind="sqlQuery"></textarea>
+
+            <div class="query-buttons">
+                <button class="run-query-button" @onclick="RunSqlQuery">
+                    > Run Query
+                </button>
+            </div>
+        </div>
+
+        <div class="sql-examples">
+            <h4>Database & Examples</h4>
+            <div class="db-name">spacecraft</div>
+            
+            <div class="example-query" @onclick='() => sqlQuery = "SELECT COUNT(*) FROM spacecraft"'>
+                SELECT COUNT(*) FROM spacecraft
+            </div>
+            
+            <div class="example-query" @onclick='() => sqlQuery = "SELECT name, serial_number, created_at FROM spacecraft ORDER BY created_at DESC LIMIT 10"'>
+                SELECT name, serial_number, created_at FROM spacecraft ORDER BY created_at DESC LIMIT 10
+            </div>
+            
+            <div class="example-query" @onclick='() => sqlQuery = "SELECT name, description FROM spacecraft WHERE serial_number IS NOT NULL LIMIT 10"'>
+                SELECT name, description FROM spacecraft WHERE serial_number IS NOT NULL LIMIT 10
+            </div>
+        </div>
     </div>
 </div>
 
 <!-- Query Results -->
 @if (queryError != null)
 {
-    <div class="error-message">@queryError</div>
+    <div class="error-message"> @queryError</div>
 }
 else if (queryResults != null)
 {
@@ -198,11 +230,6 @@ else if (queryResults != null)
             }
         </div>
 
-        <div class="load-more">
-            <button class="load-more-button" @onclick="LoadMore" disabled="@isLoadingMore">
-                @(isLoadingMore ? "Loading..." : "Load More Spacecraft")
-            </button>
-        </div>
     }
     else if (string.IsNullOrWhiteSpace(searchTerm))
     {
@@ -299,7 +326,8 @@ private async Task RunSqlQuery()
         // Additional safety: block dangerous keywords
         var dangerousKeywords = new[] { "INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "TRUNCATE", "EXEC", "EXECUTE" };
         var upperQuery = trimmedQuery.ToUpperInvariant();
-        if (dangerousKeywords.Any(keyword => upperQuery.Contains(keyword)))
+        bool isDangerous = dangerousKeywords.Any(keyword => Regex.IsMatch(upperQuery, $@"\b{keyword}\b", RegexOptions.IgnoreCase));
+        if (isDangerous)
         {
             queryError = "Query contains forbidden keywords. Only SELECT queries are allowed.";
             return;
