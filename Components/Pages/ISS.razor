@@ -1,0 +1,567 @@
+@page "/iss"
+@using spaceTracker.Models
+@using spaceTracker.Services
+@inject n2yoService n2yoService
+@inject weatherService weatherService
+
+<PageTitle>ISS Tracker - International Space Station</PageTitle>
+
+<div class="iss-container">
+    <div class="iss-header">
+        <h1>International Space Station</h1>
+        <p class="subtitle">Real-time tracking and visibility information</p>
+
+        <div class="weather-info">
+            @if (weatherData != null)
+            {
+                <div class="weather-info">
+                    <p>
+                        Weather in @currentLocationName: 
+                        <strong>@weatherData.Current.Temperature_2m</strong>°C 
+                        (<strong>@CelsiusToFahrenheit(weatherData.Current.Temperature_2m)</strong>°F), 
+                        <strong>@weatherData.Current.WindSpeed_10m</strong> km/h wind
+                    </p>
+                </div>
+            }
+            else if (isWeatherLoading)
+            {
+                <p class="weather-loading">Fetching weather...</p>
+            }
+            else if (hasWeatherError)
+            {
+                <p class="weather-error">Unable to fetch weather data</p>
+            }
+        </div>
+    </div>
+
+
+    @if (isInitialLoading)
+    {
+        <div class="loading-initial">
+            <div class="spinner"></div>
+            <p>Loading ISS data...</p>
+        </div>
+    }
+    else if (hasError)
+    {
+        <div class="error-message">
+            <strong>Error loading ISS data</strong>
+            <p>Please try refreshing the page</p>
+        </div>
+    }
+    else
+    {
+        <!-- Current Position Card -->
+        <div class="info-card current-position">
+            <div class="card-header">
+                <h2> Current Position</h2>           
+            </div>
+            <div class="card-content">
+                @if (issPosition?.Positions?.FirstOrDefault() != null)
+                {
+                    var pos = issPosition.Positions.First();
+                    <div class="position-grid">
+                        <div class="position-item">
+                            <span class="label">Latitude</span>
+                            <span class="value">@pos.Satlatitude.ToString("F4")°</span>
+                        </div>
+                        <div class="position-item">
+                            <span class="label">Longitude</span>
+                            <span class="value">@pos.Satlongitude.ToString("F4")°</span>
+                        </div>
+                        <div class="position-item">
+                            <span class="label">Altitude</span>
+                            <span class="value">@pos.Sataltitude.ToString("F2") km</span>
+                        </div>
+                        <div class="position-item">
+                            <span class="label">Velocity</span>
+                            <span class="value">~7.66 km/s</span>
+                        </div>
+                    </div>
+                    
+                    <div class="visibility-status">
+                        @if (pos.Elevation > 0)
+                        {
+                            <div class="visible-alert">
+                                <strong> VISIBLE NOW!</strong>
+                                <p>Look @GetCompassDirection(pos.Azimuth) at @pos.Elevation.ToString("F1")° elevation</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="not-visible-alert">
+                                <strong>Below Horizon</strong>
+                                <p>Currently @pos.Elevation.ToString("F1")° below your horizon</p>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="celestial-coords">
+                        <div class="coord-item">
+                            <span class="label">Right Ascension</span>
+                            <span class="value">@pos.Ra.ToString("F2")°</span>
+                        </div>
+                        <div class="coord-item">
+                            <span class="label">Declination</span>
+                            <span class="value">@pos.Dec.ToString("F2")°</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Visual Passes Timeline -->
+        <div class="info-card">
+            <div class="card-header">
+                <h2> Upcoming Visual Passes for @currentLocationName</h2>
+                <span class="card-subtitle">When you can see the ISS with your naked eye</span>
+            </div>
+            <div class="card-content">
+                @if (issVisualPasses?.Passes != null && issVisualPasses.Passes.Any())
+                {
+                    <div class="timeline">
+                        @foreach (var (pass, index) in issVisualPasses.Passes.Take(5).Select((p, i) => (p, i)))
+                        {
+                            var startTime = DateTimeOffset.FromUnixTimeSeconds(pass.StartUTC).ToLocalTime();
+                            var maxTime = DateTimeOffset.FromUnixTimeSeconds(pass.MaxUTC).ToLocalTime();
+                            var endTime = DateTimeOffset.FromUnixTimeSeconds(pass.EndUTC).ToLocalTime();
+                            var duration = pass.Duration / 60;
+                            var isUpcoming = startTime > DateTimeOffset.Now && startTime < DateTimeOffset.Now.AddHours(24);
+                            
+                            <div class="timeline-item @(isUpcoming ? "upcoming" : "")">
+                                <div class="timeline-marker">
+                                    <div class="marker-dot"></div>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="pass-header">
+                                        <h3>@startTime.ToString("dddd, MMMM dd")</h3>
+                                        @if (isUpcoming)
+                                        {
+                                            <span class="upcoming-badge"> Next 24 Hours</span>
+                                        }
+                                        @if (pass.MaxEl > 60)
+                                        {
+                                            <span class="quality-badge excellent">Excellent View</span>
+                                        }
+                                        else if (pass.MaxEl > 30)
+                                        {
+                                            <span class="quality-badge good">Good View</span>
+                                        }
+                                    </div>
+                                    
+                                    <div class="pass-time">
+                                        <strong> @startTime.ToString("h:mm:ss tt")</strong> to <strong>@endTime.ToString("h:mm:ss tt")</strong>
+                                        <span class="duration">(@duration min)</span>
+                                    </div>
+                                    
+                                    <div class="pass-details">
+                                        <div class="detail-item">
+                                            <span class="detail-label">Peak Time</span>
+                                            <span class="detail-value">@maxTime.ToString("h:mm:ss tt")</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Max Elevation</span>
+                                            <span class="detail-value">@pass.MaxEl.ToString("F1")°</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Brightness</span>
+                                            <span class="detail-value">@pass.Mag mag</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="pass-path">
+                                        <strong>Path:</strong>
+                                        <span class="path-segment">
+                                            Rise <strong>@pass.StartAzCompass</strong> (@pass.StartAz.ToString("F0")°)
+                                        </span>
+                                        <span class="arrow">→</span>
+                                        <span class="path-segment">
+                                            Peak <strong>@pass.MaxAzCompass</strong> (@pass.MaxAz.ToString("F0")°)
+                                        </span>
+                                        <span class="arrow">→</span>
+                                        <span class="path-segment">
+                                            Set <strong>@pass.EndAzCompass</strong> (@pass.EndAz.ToString("F0")°)
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="no-data">No visible passes in the next 10 days </p>
+                }
+            </div>
+        </div>
+
+        <!-- Radio Passes -->
+        <div class="info-card">
+            <div class="card-header">
+                <h2> Radio Communication Windows</h2>
+                <span class="card-subtitle">For amateur radio operators</span>
+            </div>
+            <div class="card-content">
+                @if (issRadioPasses?.Passes != null && issRadioPasses.Passes.Any())
+                {
+                    <div class="radio-info">
+                        <div class="frequency-box">
+                            <strong> ISS Ham Radio Frequencies</strong>
+                            <div class="frequencies">
+                                <span>Downlink: <strong>145.800 MHz</strong></span>
+                                <span>Uplink: <strong>144.490 MHz</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="radio-passes-list">
+                        @foreach (var pass in issRadioPasses.Passes.Take(5))
+                        {
+                            var startTime = DateTimeOffset.FromUnixTimeSeconds(pass.StartUTC).ToLocalTime();
+                            var endTime = DateTimeOffset.FromUnixTimeSeconds(pass.EndUTC).ToLocalTime();
+                            var duration = (endTime - startTime).TotalMinutes;
+                            
+                            <div class="radio-pass-item">
+                                <div class="radio-pass-time">
+                                    <strong>@startTime.ToString("ddd, MMM dd @ h:mm tt")</strong>
+                                    @if (pass.MaxEl > 45)
+                                    {
+                                        <span class="signal-badge"> Great Signal</span>
+                                    }
+                                </div>
+                                <div class="radio-pass-details">
+                                    <span>Max Elevation: <strong>@pass.MaxEl.ToString("F1")°</strong></span>
+                                    <span>Duration: <strong>@duration.ToString("F0") min</strong></span>
+                                    <span>Path: @pass.StartAzCompass → @pass.MaxAzCompass → @pass.EndAzCompass</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="no-data">No radio passes available</p>
+                }
+            </div>
+        </div>
+
+        <!-- TLE Orbital Data -->
+        <div class="info-card">
+            <div class="card-header">
+                <h2> Orbital Elements (TLE Data)</h2>
+                <span class="card-subtitle">Two-Line Element set for precise tracking</span>
+            </div>
+            <div class="card-content">
+                @if (issTLE != null && !string.IsNullOrEmpty(issTLE.Tle))
+                {
+                    <div class="tle-info">
+                        <p><strong>Satellite:</strong> @issTLE.Info?.Satname (NORAD ID: @issTLE.Info?.Satid)</p>
+                        
+                        <div class="tle-box">
+                            <pre>@issTLE.Tle</pre>
+                        </div>
+
+                        @{
+                            var lines = issTLE.Tle.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                            if (lines.Length >= 2)
+                            {
+                                <div class="tle-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-label">Epoch</span>
+                                        <span class="stat-value">@lines[0].Substring(18, 14)</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">Inclination</span>
+                                        <span class="stat-value">@lines[1].Substring(8, 8).Trim()°</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">Eccentricity</span>
+                                        <span class="stat-value">0.@lines[1].Substring(26, 7)</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">Revolutions/Day</span>
+                                        <span class="stat-value">@lines[1].Substring(52, 11).Trim()</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="tle-explanation">
+                                    <p><strong>What this means:</strong></p>
+                                    <ul>
+                                        <li><strong>Inclination:</strong> The orbit angle relative to Earth's equator</li>
+                                        <li><strong>Eccentricity:</strong> How circular the orbit is (closer to 0 = more circular)</li>
+                                        <li><strong>Revolutions/Day:</strong> How many times the ISS orbits Earth daily (~90 minutes per orbit)</li>
+                                    </ul>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="no-data">TLE data not available</p>
+                }
+            </div>
+        </div>
+
+        <!-- ISS Facts -->
+        <div class="info-card facts-card">
+            <div class="card-header">
+                <h2> ISS Quick Facts</h2>
+            </div>
+            <div class="card-content">
+                <div class="facts-grid">
+                    <div class="fact-item">
+                        <span class="fact-icon"></span>
+                        <div class="fact-content">
+                            <strong>Launch Date</strong>
+                            <p>November 20, 1998</p>
+                        </div>
+                    </div>
+                    <div class="fact-item">
+                        <span class="fact-icon"></span>
+                        <div class="fact-content">
+                            <strong>Speed</strong>
+                            <p>~27,600 km/h (17,150 mph)</p>
+                        </div>
+                    </div>
+                    <div class="fact-item">
+                        <span class="fact-icon"></span>
+                        <div class="fact-content">
+                            <strong>Orbit Time</strong>
+                            <p>~90 minutes per orbit</p>
+                        </div>
+                    </div>
+                    <div class="fact-item">
+                        <span class="fact-icon"></span>
+                        <div class="fact-content">
+                            <strong>Sunrises/Day</strong>
+                            <p>~16 sunrises and sunsets</p>
+                        </div>
+                    </div>
+                    <div class="fact-item">
+                        <span class="fact-icon"></span>
+                        <div class="fact-content">
+                            <strong>Size</strong>
+                            <p>109m x 73m (football field)</p>
+                        </div>
+                    </div>
+                    <div class="fact-item">
+                        <span class="fact-icon"></span>
+                        <div class="fact-content">
+                            <strong>Crew Size</strong>
+                            <p>Typically 6-7 astronauts</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private SatellitePosition? issPosition;
+    private VisualPassesResponse? issVisualPasses;
+    private RadioPassesResponse? issRadioPasses;
+    private TleResponse? issTLE;
+    
+    // --- STATE CHANGES ---
+    private bool isInitialLoading = true; // Renamed from 'isLoading'
+    private bool isRefreshing = false;     // NEW flag for refresh buttons
+    private bool hasError = false;
+    // ---------------------
+
+    private int selectedLocationId = 0;  // Worcester, MA
+
+    private const int issNoradId = 25544;
+    private weatherResponse? weatherData;
+    private bool isWeatherLoading = true;
+    private bool hasWeatherError = false;
+
+    private double currentLat => 42.2626;
+    private double currentLng => -71.8023;
+    private double currentAlt => 0;
+    private string currentLocationName => "Worcester, MA";
+
+
+
+    // Major cities dictionary
+    private readonly Dictionary<int, (string Name, double Lat, double Lng, double Alt)> locations = new()
+    {
+        { 0, ("Worcester, MA", 42.2626, -71.8023, 0) },
+        { 1, ("Boston, MA", 42.3601, -71.0589, 0) },
+        { 2, ("New York, NY", 40.7128, -74.0060, 0) },
+        { 3, ("Miami, FL", 25.7617, -80.1918, 0) },
+        { 4, ("Phoenix, AZ", 33.4484, -112.0740, 0) },
+        { 5, ("Nashville, TN", 36.1627, -86.7816, 0) },
+        { 6, ("Austin, TX", 30.2672, -97.7431, 0) },
+        { 7, ("Houston, TX", 29.7604, -95.3698, 0) },
+        { 8, ("Chicago, IL", 41.8781, -87.6298, 0) },
+        { 9, ("Los Angeles, CA", 34.0522, -118.2437, 0) },
+        { 10, ("Seattle, WA", 47.6062, -122.3321, 0) },
+        { 11, ("Denver, CO", 39.7392, -104.9903, 0) },
+        { 12, ("Las Vegas, NV", 36.1699, -115.1398, 0) },
+        { 13, ("San Francisco, CA", 37.7749, -122.4194, 0) },
+        { 14, ("Portland, OR", 45.5152, -122.6784, 0) },
+        { 15, ("Atlanta, GA", 33.7490, -84.3880, 0) },
+        { 16, ("Washington, DC", 38.9072, -77.0369, 0) },
+        { 17, ("Philadelphia, PA", 39.9526, -75.1652, 0) },
+        { 18, ("Minneapolis, MN", 44.9778, -93.2650, 0) },
+        { 19, ("San Diego, CA", 32.7157, -117.1611, 0) }
+    };
+
+    @* private double currentLat => locations[selectedLocationId].Lat;
+    private double currentLng => locations[selectedLocationId].Lng;
+    private double currentAlt => locations[selectedLocationId].Alt;
+    private string currentLocationName => locations[selectedLocationId].Name; *@
+
+    protected override async Task OnInitializedAsync()
+    {
+        // isInitialLoading is already true, so we just load the data.
+        await LoadAllData();
+    }
+
+    // --- NEW/UPDATED HANDLERS ---
+
+    @* private async Task RefreshLocationData()
+    {
+        if (isRefreshing) return;
+
+        isRefreshing = true;
+        StateHasChanged(); // Update UI to show "Refreshing..."
+
+        try
+        {
+            await Task.WhenAll(LoadISSData(), LoadWeatherData());
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            Console.WriteLine($"Error refreshing location data: {ex.Message}");
+        }
+        finally
+        {
+            isRefreshing = false;
+            StateHasChanged(); // Update UI to hide "Refreshing..."
+        }
+    } *@
+
+    private async Task RefreshData()
+    {
+        if (isRefreshing) return;
+
+        isRefreshing = true;
+        StateHasChanged(); // Update UI to show "Refreshing..."
+
+        try
+        {
+            await LoadISSData();
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            Console.WriteLine($"Error refreshing ISS data: {ex.Message}");
+        }
+        finally
+        {
+            isRefreshing = false;
+            StateHasChanged(); // Update UI to hide "Refreshing..." and show new data
+        }
+    }
+
+    @* private async Task OnLocationChanged()
+    {
+        Console.WriteLine($"Location changed to ID {selectedLocationId} → {currentLocationName}");
+        isInitialLoading = true;
+        StateHasChanged();
+        await LoadAllData();
+    } *@
+
+    @* private async Task HandleLocationChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var newId))
+        {
+            selectedLocationId = newId;
+            
+            isInitialLoading = true;
+            StateHasChanged(); // Show loading spinner
+            
+            await LoadAllData();
+            // LoadAllData already calls StateHasChanged() at the end, so we're good
+        }
+    } *@
+
+    private double CelsiusToFahrenheit(double celsius) {return (celsius * 9 / 5) + 32;}
+
+    private async Task LoadAllData()
+    {
+        // This method is for the *initial* load or a *location change*.
+        // It's responsible for turning off the main page spinner.
+        hasError = false;
+
+        await Task.WhenAll(LoadISSData(), LoadWeatherData());
+
+        isInitialLoading = false; // We're done with the big load
+        StateHasChanged();
+    }
+    private async Task LoadISSData()
+    {
+        hasError = false;
+
+        try
+        {
+            Console.WriteLine($"[ISS] Starting data load for {currentLocationName} ({currentLat}, {currentLng})");
+
+            var issTask = n2yoService.GetSatellitePosition(issNoradId, currentLat, currentLng, currentAlt);
+            var visualPassesTask = n2yoService.GetVisualPasses(issNoradId, currentLat, currentLng, currentAlt, 10, 300);
+            var radioPassesTask = n2yoService.GetRadioPasses(issNoradId, currentLat, currentLng, currentAlt, 10, 10);
+            var tleTask = n2yoService.GetSatelliteTLE(issNoradId);
+
+            // Await all tasks ONCE
+            await Task.WhenAll(issTask, visualPassesTask, radioPassesTask, tleTask);
+
+            // Now assign results
+            issPosition = await issTask;
+            issVisualPasses = await visualPassesTask;
+            issRadioPasses = await radioPassesTask;
+            issTLE = await tleTask;
+
+            Console.WriteLine($"[ISS] Data loaded successfully. Position: {issPosition?.Positions?.FirstOrDefault()?.Satlatitude:F4}°");
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            Console.WriteLine($"[ISS] ERROR in LoadISSData: {ex.Message}");
+            Console.WriteLine($"[ISS] Stack trace: {ex.StackTrace}");
+        }
+    }
+
+    private async Task LoadWeatherData()
+    {
+        // This method's local 'isWeatherLoading' flag is fine.
+        isWeatherLoading = true;
+        hasWeatherError = false;
+
+        try
+        {
+            weatherData = await weatherService.GetWeatherData(currentLat, currentLng);
+        }
+        catch (Exception ex)
+        {
+            hasWeatherError = true;
+            Console.WriteLine($"Error loading weather data: {ex.Message}");
+        }
+        finally
+        {
+            isWeatherLoading = false;
+            // REMOVED StateHasChanged()
+            // The method that *called* LoadWeatherData will handle the re-render.
+        }
+    }
+
+    private string GetCompassDirection(double azimuth)
+    {
+        var directions = new[] { "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW" };
+        var index = (int)Math.Round(azimuth / 22.5) % 16;
+        return directions[index];
+    }
+}
