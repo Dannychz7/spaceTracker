@@ -1,4 +1,5 @@
 let viewer = null;
+let markerPositions = [];
 
 export function initializeGlobe(containerId) {
     viewer = new Cesium.Viewer(containerId, {
@@ -12,14 +13,38 @@ export function initializeGlobe(containerId) {
         navigationHelpButton: false,
         animation: false,
         timeline: false,
+        selectionIndicator: false,
+        fullscreenButton: false,
         creditContainer: document.createElement('div')
     });
     
     viewer.cesiumWidget.creditContainer.style.display = 'none';
     
+    // Allow links to open in new tabs
+    var iframe = document.getElementsByClassName('cesium-infoBox-iframe')[0];
+    iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox');
+    
+    // Intercept link clicks in InfoBox and open in parent window
+    iframe.addEventListener('load', function() {
+        try {
+            var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            iframeDoc.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A' && e.target.href) {
+                    e.preventDefault();
+                    window.open(e.target.href, '_blank');
+                }
+            });
+        } catch (e) {
+            console.log('Could not access iframe:', e);
+        }
+    });
+    
     // Set camera constraints
     viewer.scene.screenSpaceCameraController.minimumZoomDistance = 2000000;
     viewer.scene.screenSpaceCameraController.maximumZoomDistance = 50000000;
+    
+    // Disable double-click zoom
+    viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
     
     return true;
 }
@@ -36,7 +61,15 @@ export function updateMarker(entityId, lat, lon) {
 export function addMarker(lat, lon, name, description) {
     if (!viewer) return null;
     
+    // Calculate label offset based on existing markers
+    const offset = calculateLabelOffset(lat, lon);
+    
+    // Store position for overlap detection
+    markerPositions.push({ lat, lon });
+    
+    // Add marker point
     const entity = viewer.entities.add({
+        id: name,
         position: Cesium.Cartesian3.fromDegrees(lon, lat),
         point: {
             pixelSize: 10,
@@ -46,11 +79,12 @@ export function addMarker(lat, lon, name, description) {
         },
         label: {
             text: name,
-            font: '14pt sans-serif',
+            font: '12pt sans-serif',
             style: Cesium.LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            pixelOffset: new Cesium.Cartesian2(0, -9)
+            horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
+            pixelOffset: new Cesium.Cartesian2(offset.pixelX, offset.pixelY)
         },
         description: description
     });
@@ -58,18 +92,39 @@ export function addMarker(lat, lon, name, description) {
     return entity.id;
 }
 
-// Not functional atm
+function calculateLabelOffset(lat, lon) {
+    let overlapCount = 0;
+    const threshold = 10; // degrees
+    
+    // Count overlapping markers
+    for (const pos of markerPositions) {
+        if (Math.abs(pos.lat - lat) < threshold && Math.abs(pos.lon - lon) < threshold) {
+            overlapCount++;
+        }
+    }
+    
+    // Spread labels in circular pattern
+    const angle = overlapCount * 45 * (Math.PI / 180); // 45 degrees apart
+    const distance = 15 + (overlapCount * 10); // smaller distances
+    
+    return {
+        pixelX: Math.cos(angle) * distance,
+        pixelY: Math.sin(angle) * distance - 10
+    };
+}
+
 export function addISSMarker(lat, lon, name, description) {
     if (!viewer) return null;
     
     const entity = viewer.entities.add({
         id: 'iss-marker',
         position: Cesium.Cartesian3.fromDegrees(lon, lat),
-        point: {
-            pixelSize: 20,  // Much bigger
-            color: Cesium.Color.CYAN,
-            outlineColor: Cesium.Color.WHITE,
-            outlineWidth: 3
+        billboard: {
+            image: '/ISS_spacecraft_model_1.png',
+            width: 64,
+            height: 64,
+            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            horizontalOrigin: Cesium.HorizontalOrigin.CENTER
         },
         label: {
             text: name,
@@ -79,7 +134,7 @@ export function addISSMarker(lat, lon, name, description) {
             outlineColor: Cesium.Color.BLACK,
             outlineWidth: 3,
             verticalOrigin: Cesium.VerticalOrigin.TOP,
-            pixelOffset: new Cesium.Cartesian2(0, 15)
+            pixelOffset: new Cesium.Cartesian2(0, 40)
         },
         description: description
     });
@@ -93,6 +148,15 @@ export function flyToLocation(lat, lon) {
     viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(lon, lat, 15000000),
         duration: 2
+    });
+}
+
+export function resetView() {
+    if (!viewer) return;
+    
+    viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000),
+        duration: 1.5
     });
 }
 

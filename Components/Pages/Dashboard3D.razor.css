@@ -4,3 +4,10 @@ h1 {
     font-size: 2.5em;
     color: #0a1929;
 }
+
+/* Hacky way to hide annoying "Focus camera on object" toggle, sadly doesn't work */
+button.cesium-infoBox-camera{
+
+display: none;
+
+}

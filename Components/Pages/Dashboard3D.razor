@@ -11,12 +11,15 @@
 
 <h1>Upcoming Launch Locations</h1>
 
-<div id="cesiumContainer" style="width: 100%; height: 80vh;"></div>
+<button @onclick="ResetView" class="btn btn-primary mb-2">Reset View</button>
+
+<div id="cesiumContainer" style="width: 100%; height: 90vh;"></div>
 
 @code {
     private List<SpaceDevsLaunch> launches = new();
     private SatellitePosition? issPosition;
     private System.Threading.Timer? _timer;
+    private string? _issMarkerId;
     
     protected override async Task OnInitializedAsync()
     {
@@ -42,7 +45,11 @@
                         launch.Pad.latitude.Value,
                         launch.Pad.longitude.Value,
                         launch.Name,
-                        $"{launch.Mission?.Description ?? "No description"}<br/>Launch: {launch.Net?.ToString("g") ?? "TBD"}"
+                            $"<h3>{launch.Name}</h3>" +
+                            $"<b>Mission:</b> {launch.Mission?.Description ?? "No description"}<br/>" +
+                            $"<b>Launch:</b> {launch.Net?.ToString("g") ?? "TBD"}<br/>" +
+                            $"<b>Provider:</b> {launch.Provider?.Name ?? "Unknown"}<br/>" +
+                            $"<b>Location:</b> {launch.Pad?.Location?.Name ?? "Unknown"}"
                     );
                 }
             }
@@ -51,11 +58,15 @@
             if (issPosition?.Positions?.Count > 0)
             {
                 var pos = issPosition.Positions[0];
-                await cesiumService.AddMarkerAsync(
+                _issMarkerId = await cesiumService.AddISSMarkerAsync(
                     pos.Satlatitude,
                     pos.Satlongitude,
                     "ISS",
-                    $"International Space Station<br/>Altitude: {pos.Sataltitude:F2} km"
+                    $"<h3>International Space Station</h3>" +
+                    $"<b>Altitude:</b> {pos.Sataltitude:F2} km<br/>" +
+                    $"<b>Latitude:</b> {pos.Satlatitude:F4}°<br/>" +
+                    $"<b>Longitude:</b> {pos.Satlongitude:F4}°<br/><br/>" +
+                    $"<b>Live Stream:</b> <a href='https://www.youtube.com/watch?v=fO9e9jnhYK8'>Watch on YouTube</a>"
                 );
             }
         }
@@ -63,8 +74,19 @@
 
     private async Task UpdateISSPosition()
     {
-        issPosition = await n2yoService.GetISSPosition(42.2626, -71.8023, 0);
-        await InvokeAsync(StateHasChanged);
+        var newPosition = await n2yoService.GetISSPosition(42.2626, -71.8023, 0);
+        
+        if (newPosition?.Positions?.Count > 0 && !string.IsNullOrEmpty(_issMarkerId))
+        {
+            var pos = newPosition.Positions[0];
+            await cesiumService.UpdateMarkerAsync(_issMarkerId, pos.Satlatitude, pos.Satlongitude);
+            issPosition = newPosition;
+        }
+    }
+
+    private async Task ResetView()
+    {
+        await cesiumService.ResetViewAsync();
     }
     
     public async ValueTask DisposeAsync()
@@ -74,9 +96,6 @@
         {
             await cesiumService.DisposeAsync();
         }
-        catch (JSDisconnectedException)
-        {
-            // Circuit disconnected during page refresh
-        }
+        catch (JSDisconnectedException) { }
     }
 }

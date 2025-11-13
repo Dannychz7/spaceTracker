@@ -42,6 +42,12 @@ public class CesiumService : IAsyncDisposable
         await module.InvokeVoidAsync("flyToLocation", lat, lon);
     }
 
+    public async Task ResetViewAsync()
+    {
+        var module = await _moduleTask.Value;
+        await module.InvokeVoidAsync("resetView");
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (_moduleTask.IsValueCreated)
