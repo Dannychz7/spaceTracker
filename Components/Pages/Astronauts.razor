@@ -9,6 +9,11 @@
 
 <h1>Famous Astronauts</h1>
 
+@if (astronauts.Any())
+{
+    <p class="astronaut-count">Showing @astronauts.Count astronaut@(astronauts.Count != 1 ? "s" : "")</p>
+}
+
 <div class="search-container">
     <input type="text" 
            placeholder="Search astronaut..." 
@@ -236,10 +241,15 @@
                 search: string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm
             );
 
-            if (append && newAstronauts.Any())
+            if (append)
             {
-                astronauts.AddRange(newAstronauts);
-                currentOffset += PageSize;
+                if (newAstronauts.Any())
+                {
+                    // Only add them if we got new ones
+                    astronauts.AddRange(newAstronauts);
+                    currentOffset += PageSize;
+                }
+                // If newAstronauts is empty, we do nothing.
             }
             else
             {
