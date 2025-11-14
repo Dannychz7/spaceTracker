@@ -28,20 +28,20 @@
             {
                 <div class="launch-card compact">
                     <div class="launch-thumb">
+                    @{
+                        var initialsKey = launch.Provider?.Abbrev ?? launch.Provider?.Name ?? launch.Name;
+                        // Show placeholder by default; hide it via onload when an image loads successfully.
+                    }
+                    <div class="thumb-placeholder" style="@GetGradientStyle(initialsKey); display:@((launch.Image?.ImageUrl == null && string.IsNullOrEmpty(launch.Infographic)) ? "flex" : "none")">
+                        <span class="thumb-initials">@GetInitials(initialsKey)</span>
+                    </div>
                     @if (launch.Image?.ImageUrl != null)
                     {
-                        <img src="@launch.Image.ImageUrl" alt="@launch.Name" />
+                        <img src="@launch.Image.ImageUrl" alt="@launch.Name" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.previousElementSibling.style.display='none';" />
                     }
                     else if (!string.IsNullOrEmpty(launch.Infographic))
                     {
-                        <img src="@launch.Infographic" alt="@launch.Name" />
-                    }
-                    else
-                    {
-                        var initialsKey = launch.Provider?.Abbrev ?? launch.Provider?.Name ?? launch.Name;
-                        <div class="thumb-placeholder" style="@GetGradientStyle(initialsKey)">
-                            <span class="thumb-initials">@GetInitials(initialsKey)</span>
-                        </div>
+                        <img src="@launch.Infographic" alt="@launch.Name" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.previousElementSibling.style.display='none';" />
                     }
 
                     </div>

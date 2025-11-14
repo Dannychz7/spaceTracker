@@ -18,19 +18,17 @@ else if (launch != null)
 {
     <div class="launch-detail">
         <div class="profile-like">
-            <div class="detail-image">
-                @if (!string.IsNullOrEmpty(launch.Infographic))
-                {
-                    <img src="@launch.Infographic" alt="@launch.Name" class="detail-main-image" />
-                }
-                else
-                {
-                    var initialsKey = launch.Provider?.Abbrev ?? launch.Provider?.Name ?? launch.Name;
-                    <div class="thumb-placeholder detail-thumb" style="@GetGradientStyle(initialsKey)">
-                        <span class="thumb-initials" style="color:@GetContrastColor(initialsKey)">@GetInitials(initialsKey)</span>
-                    </div>
-                }
-            </div>
+                <div class="detail-image">
+                    @if (!string.IsNullOrEmpty(launch.Infographic))
+                    {
+                        <img src="@launch.Infographic" alt="@launch.Name" class="detail-main-image" />
+                    }
+                    else
+                    {
+                        <!-- Left-side initials placeholder removed per request. Keep the area empty so the right-side provider block remains the single logo. -->
+                        <div class="detail-main-image-placeholder"></div>
+                    }
+                </div>
             <div class="detail-left">
                 <h1>@launch.Name</h1>
                 <div class="meta-row">
@@ -53,7 +51,7 @@ else if (launch != null)
                 <div class="section">
                     <h3>Vehicle & Provider</h3>
                     <p><strong>Provider:</strong> @launch.Provider?.Name</p>
-                    <p><strong>Rocket:</strong> @launch.Rocket?.Configuration?.FullName ?? @launch.Rocket?.Configuration?.Name</p>
+                    <p><strong>Rocket:</strong> @(launch.Rocket?.Configuration?.FullName ?? launch.Rocket?.Configuration?.Name ?? "—")</p>
                 </div>
 
                 <div class="section">
@@ -72,9 +70,12 @@ else if (launch != null)
 
             <div class="detail-right">
                 <div class="card-muted">
+                    @{
+                        var initialsKey = launch.Provider?.Abbrev ?? launch.Provider?.Name ?? launch.Name;
+                    }
                     <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                        <div class="provider-avatar" style="width:56px; height:56px; border-radius:6px; background:#eef; display:flex; align-items:center; justify-content:center; font-weight:700;">
-                            @((launch.Provider?.Abbrev ?? launch.Provider?.Name ?? "?")[0])
+                        <div class="provider-avatar" style="width:56px; height:56px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:700; @GetGradientStyle(initialsKey); color:@GetContrastColor(initialsKey)">
+                            @GetInitials(initialsKey)
                         </div>
                         <div>
                             <div style="font-weight:700;">@launch.Provider?.Name</div>
