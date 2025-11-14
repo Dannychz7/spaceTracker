@@ -43,7 +43,12 @@ public class AstronautSeeder
             foreach (var astro in response.Results)
             {
                 if (existingIds.Contains(astro.Id))
+                {
+                    // Update LastUpdated so TTL works
+                    var existing = await _dbContext.Astronauts.FirstAsync(a => a.Id == astro.Id);
+                    existing.LastUpdated = DateTime.UtcNow;
                     continue;
+                }
 
                 var entity = new AstronautEntity
                 {

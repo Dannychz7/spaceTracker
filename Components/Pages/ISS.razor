@@ -54,7 +54,7 @@
         <!-- Current Position Card -->
         <div class="info-card current-position">
             <div class="card-header">
-                <h2> Current Position</h2>           
+                <h2>Current Position</h2>           
             </div>
             <div class="card-content">
                 @if (issPosition?.Positions?.FirstOrDefault() != null)
@@ -83,7 +83,7 @@
                         @if (pos.Elevation > 0)
                         {
                             <div class="visible-alert">
-                                <strong> VISIBLE NOW!</strong>
+                                <strong>VISIBLE NOW!</strong>
                                 <p>Look @GetCompassDirection(pos.Azimuth) at @pos.Elevation.ToString("F1")° elevation</p>
                             </div>
                         }
@@ -94,6 +94,28 @@
                                 <p>Currently @pos.Elevation.ToString("F1")° below your horizon</p>
                             </div>
                         }
+                    </div>
+
+                    <!-- Live Stream Card -->
+                    <div class="info-card live-stream-card">
+                        <div class="card-header">
+                            <h2>Live ISS Stream</h2>
+                            <span class="card-subtitle">High Definition Earth Viewing System</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="video-container">
+                                <iframe 
+                                    src="https://www.youtube.com/embed/fO9e9jnhYK8?autoplay=1&mute=1" 
+                                    title="ISS Live Stream" 
+                                    frameborder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                    allowfullscreen>
+                                </iframe>
+                            </div>
+                            <div class="stream-info">
+                                <p><strong>About this stream:</strong> Live view from the International Space Station includes internal views when the crew is on-duty and Earth views at other times.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="celestial-coords">
@@ -113,7 +135,7 @@
         <!-- Visual Passes Timeline -->
         <div class="info-card">
             <div class="card-header">
-                <h2> Upcoming Visual Passes for @currentLocationName</h2>
+                <h2>Upcoming Visual Passes for @currentLocationName</h2>
                 <span class="card-subtitle">When you can see the ISS with your naked eye</span>
             </div>
             <div class="card-content">
@@ -137,7 +159,7 @@
                                         <h3>@startTime.ToString("dddd, MMMM dd")</h3>
                                         @if (isUpcoming)
                                         {
-                                            <span class="upcoming-badge"> Next 24 Hours</span>
+                                            <span class="upcoming-badge">Next 24 Hours</span>
                                         }
                                         @if (pass.MaxEl > 60)
                                         {
@@ -150,7 +172,7 @@
                                     </div>
                                     
                                     <div class="pass-time">
-                                        <strong> @startTime.ToString("h:mm:ss tt")</strong> to <strong>@endTime.ToString("h:mm:ss tt")</strong>
+                                        <strong>@startTime.ToString("h:mm:ss tt")</strong> to <strong>@endTime.ToString("h:mm:ss tt")</strong>
                                         <span class="duration">(@duration min)</span>
                                     </div>
                                     
@@ -190,7 +212,7 @@
                 }
                 else
                 {
-                    <p class="no-data">No visible passes in the next 10 days </p>
+                    <p class="no-data">No visible passes in the next 10 days</p>
                 }
             </div>
         </div>
@@ -198,7 +220,7 @@
         <!-- Radio Passes -->
         <div class="info-card">
             <div class="card-header">
-                <h2> Radio Communication Windows</h2>
+                <h2>Radio Communication Windows</h2>
                 <span class="card-subtitle">For amateur radio operators</span>
             </div>
             <div class="card-content">
@@ -206,7 +228,7 @@
                 {
                     <div class="radio-info">
                         <div class="frequency-box">
-                            <strong> ISS Ham Radio Frequencies</strong>
+                            <strong>ISS Ham Radio Frequencies</strong>
                             <div class="frequencies">
                                 <span>Downlink: <strong>145.800 MHz</strong></span>
                                 <span>Uplink: <strong>144.490 MHz</strong></span>
@@ -226,7 +248,7 @@
                                     <strong>@startTime.ToString("ddd, MMM dd @ h:mm tt")</strong>
                                     @if (pass.MaxEl > 45)
                                     {
-                                        <span class="signal-badge"> Great Signal</span>
+                                        <span class="signal-badge">Great Signal</span>
                                     }
                                 </div>
                                 <div class="radio-pass-details">
@@ -248,7 +270,7 @@
         <!-- TLE Orbital Data -->
         <div class="info-card">
             <div class="card-header">
-                <h2> Orbital Elements (TLE Data)</h2>
+                <h2>Orbital Elements (TLE Data)</h2>
                 <span class="card-subtitle">Two-Line Element set for precise tracking</span>
             </div>
             <div class="card-content">
@@ -306,47 +328,41 @@
         <!-- ISS Facts -->
         <div class="info-card facts-card">
             <div class="card-header">
-                <h2> ISS Quick Facts</h2>
+                <h2>ISS Quick Facts</h2>
             </div>
             <div class="card-content">
                 <div class="facts-grid">
                     <div class="fact-item">
-                        <span class="fact-icon"></span>
                         <div class="fact-content">
                             <strong>Launch Date</strong>
                             <p>November 20, 1998</p>
                         </div>
                     </div>
                     <div class="fact-item">
-                        <span class="fact-icon"></span>
                         <div class="fact-content">
                             <strong>Speed</strong>
                             <p>~27,600 km/h (17,150 mph)</p>
                         </div>
                     </div>
                     <div class="fact-item">
-                        <span class="fact-icon"></span>
                         <div class="fact-content">
                             <strong>Orbit Time</strong>
                             <p>~90 minutes per orbit</p>
                         </div>
                     </div>
                     <div class="fact-item">
-                        <span class="fact-icon"></span>
                         <div class="fact-content">
                             <strong>Sunrises/Day</strong>
                             <p>~16 sunrises and sunsets</p>
                         </div>
                     </div>
                     <div class="fact-item">
-                        <span class="fact-icon"></span>
                         <div class="fact-content">
                             <strong>Size</strong>
                             <p>109m x 73m (football field)</p>
                         </div>
                     </div>
                     <div class="fact-item">
-                        <span class="fact-icon"></span>
                         <div class="fact-content">
                             <strong>Crew Size</strong>
                             <p>Typically 6-7 astronauts</p>
@@ -364,11 +380,9 @@
     private RadioPassesResponse? issRadioPasses;
     private TleResponse? issTLE;
     
-    // --- STATE CHANGES ---
     private bool isInitialLoading = true; // Renamed from 'isLoading'
-    private bool isRefreshing = false;     // NEW flag for refresh buttons
+    private bool isRefreshing = false;    
     private bool hasError = false;
-    // ---------------------
 
     private int selectedLocationId = 0;  // Worcester, MA
 
@@ -409,41 +423,11 @@
         { 19, ("San Diego, CA", 32.7157, -117.1611, 0) }
     };
 
-    @* private double currentLat => locations[selectedLocationId].Lat;
-    private double currentLng => locations[selectedLocationId].Lng;
-    private double currentAlt => locations[selectedLocationId].Alt;
-    private string currentLocationName => locations[selectedLocationId].Name; *@
-
     protected override async Task OnInitializedAsync()
     {
         // isInitialLoading is already true, so we just load the data.
         await LoadAllData();
     }
-
-    // --- NEW/UPDATED HANDLERS ---
-
-    @* private async Task RefreshLocationData()
-    {
-        if (isRefreshing) return;
-
-        isRefreshing = true;
-        StateHasChanged(); // Update UI to show "Refreshing..."
-
-        try
-        {
-            await Task.WhenAll(LoadISSData(), LoadWeatherData());
-        }
-        catch (Exception ex)
-        {
-            hasError = true;
-            Console.WriteLine($"Error refreshing location data: {ex.Message}");
-        }
-        finally
-        {
-            isRefreshing = false;
-            StateHasChanged(); // Update UI to hide "Refreshing..."
-        }
-    } *@
 
     private async Task RefreshData()
     {
@@ -467,28 +451,6 @@
             StateHasChanged(); // Update UI to hide "Refreshing..." and show new data
         }
     }
-
-    @* private async Task OnLocationChanged()
-    {
-        Console.WriteLine($"Location changed to ID {selectedLocationId} → {currentLocationName}");
-        isInitialLoading = true;
-        StateHasChanged();
-        await LoadAllData();
-    } *@
-
-    @* private async Task HandleLocationChange(ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out var newId))
-        {
-            selectedLocationId = newId;
-            
-            isInitialLoading = true;
-            StateHasChanged(); // Show loading spinner
-            
-            await LoadAllData();
-            // LoadAllData already calls StateHasChanged() at the end, so we're good
-        }
-    } *@
 
     private double CelsiusToFahrenheit(double celsius) {double val = (celsius * 9 / 5) + 32; return Math.Round(val,2);}
 
@@ -553,8 +515,6 @@
         finally
         {
             isWeatherLoading = false;
-            // REMOVED StateHasChanged()
-            // The method that *called* LoadWeatherData will handle the re-render.
         }
     }
 
