@@ -1,4 +1,5 @@
-﻿@page "/astronauts"
+﻿@implements IDisposable
+@page "/astronauts"
 @using spaceTracker.Models
 @using spaceTracker.Services
 @inject SpaceDevsService spaceDevsService
@@ -15,7 +16,12 @@
            @bind:event="oninput" 
            @onkeyup="OnSearchInput" />
     
-    @if (!string.IsNullOrEmpty(searchTerm) && showSearchPreview)
+    @if (isSearching)
+    {
+        <div class="search-loading">Searching...</div>
+    }
+    
+    @if (!string.IsNullOrEmpty(searchTerm) && showSearchPreview && !isSearching)
     {
         <div class="search-preview">
             @if (searchPreviewResults.Any())
@@ -190,7 +196,7 @@
             <button @onclick="ShowNext" disabled="@(currentIndex >= FilteredAstronauts.Count() - 1)">Next</button>
         </div>
         
-        @if (astronauts.Count >= PageSize)
+        @if (astronauts.Count >= PageSize && string.IsNullOrWhiteSpace(searchTerm))
         {
             <div class="load-more">
                 <button @onclick="LoadMoreAstronauts" class="load-more-button">Load More Astronauts</button>
@@ -208,9 +214,11 @@
     private List<Astronaut> astronauts = new();
     private List<Astronaut> searchPreviewResults = new();
     private bool showSearchPreview = false;
+    private bool isSearching = false;
     private int currentIndex = 0;
     private int currentOffset = 0;
-    private const int PageSize = 50; // Increased to get more astronauts - max is 831
+    private const int PageSize = 50;
+    private System.Threading.Timer? debounceTimer;
 
     protected override async Task OnInitializedAsync()
     {
@@ -225,7 +233,7 @@
             var newAstronauts = await spaceDevsService.GetAstronautsAsync(
                 limit: PageSize, 
                 offset: append ? currentOffset + PageSize : 0, 
-                search: searchTerm
+                search: string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm
             );
 
             if (append && newAstronauts.Any())
@@ -249,7 +257,10 @@
 
     private async Task LoadMoreAstronauts()
     {
-        await LoadAstronauts(append: true);
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            await LoadAstronauts(append: true);
+        }
     }
 
     private void ShowNext()
@@ -270,41 +281,78 @@
         }
     }
 
-    private async Task OnSearchChanged()
-    {
-        currentIndex = 0;
-        currentOffset = 0;
-        await LoadAstronauts();
-    }
-
     private IEnumerable<Astronaut> FilteredAstronauts => astronauts;
 
     private async Task OnSearchInput(KeyboardEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(searchTerm))
+        if (e.Key == "Enter")
         {
+            debounceTimer?.Dispose();
+            await PerformSearch();
             showSearchPreview = false;
-            searchPreviewResults.Clear();
             return;
         }
 
-        showSearchPreview = true;
-        searchPreviewResults = astronauts
-            .Where(a => (a.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                       (a.Agency?.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                       (a.Nationality != null && a.Nationality.Any(n => n.NationalityName?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)))
-            .ToList();
-
-        if (e.Key == "Enter")
+        if (string.IsNullOrWhiteSpace(searchTerm))
         {
-            await OnSearchChanged();
+            debounceTimer?.Dispose();
             showSearchPreview = false;
+            searchPreviewResults.Clear();
+            await LoadAstronauts();
+            return;
+        }
+
+        debounceTimer?.Dispose();
+        debounceTimer = new System.Threading.Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await PerformSearch();
+            });
+        }, null, 500, Timeout.Infinite);
+    }
+
+    private async Task PerformSearch()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            await LoadAstronauts();
+            return;
+        }
+
+        isSearching = true;
+        StateHasChanged();
+
+        try
+        {
+            var searchResults = await spaceDevsService.GetAstronautsAsync(
+                limit: 100,
+                offset: 0,
+                search: searchTerm
+            );
+
+            astronauts = searchResults;
+            currentIndex = 0;
+            currentOffset = 0;
+            
+            searchPreviewResults = searchResults.Take(5).ToList();
+            showSearchPreview = searchResults.Any();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error searching astronauts: {ex.Message}");
+        }
+        finally
+        {
+            isSearching = false;
+            StateHasChanged();
         }
     }
 
     private void SelectAstronautFromPreview(Astronaut selected)
     {
         showSearchPreview = false;
+        searchTerm = selected.Name ?? "";
         var index = astronauts.IndexOf(selected);
         if (index != -1)
         {
@@ -315,7 +363,6 @@
 
     private void OnImageError(Microsoft.AspNetCore.Components.Web.ErrorEventArgs e, Astronaut astronaut)
     {
-        // If the main image fails, try to fall back to the thumbnail
         if (!string.IsNullOrEmpty(astronaut.ProfileImage) && !string.IsNullOrEmpty(astronaut.ProfileImageThumbnail))
         {
             astronaut.ProfileImage = astronaut.ProfileImageThumbnail;
@@ -330,17 +377,14 @@
 
         try
         {
-            // Remove the 'P' prefix and split between days (D) and time (T)
             var parts = isoDuration.TrimStart('P').Split('T');
             
-            // Parse days
             var days = 0;
             if (parts[0].Contains("D"))
             {
                 days = int.Parse(parts[0].TrimEnd('D'));
             }
 
-            // Parse hours, minutes, seconds if they exist
             var hours = 0;
             var minutes = 0;
             var seconds = 0;
@@ -369,7 +413,6 @@
                 }
             }
 
-            // Build the readable string
             var timeComponents = new List<string>();
             
             if (days > 0)
@@ -378,7 +421,7 @@
                 timeComponents.Add($"{hours} hour{(hours != 1 ? "s" : "")}");
             if (minutes > 0)
                 timeComponents.Add($"{minutes} minute{(minutes != 1 ? "s" : "")}");
-            if (seconds > 0 && days == 0) // Only show seconds if less than a day
+            if (seconds > 0 && days == 0)
                 timeComponents.Add($"{seconds} second{(seconds != 1 ? "s" : "")}");
 
             return string.Join(", ", timeComponents);
@@ -387,5 +430,10 @@
         {
             return "Format Error";
         }
+    }
+
+    public void Dispose()
+    {
+        debounceTimer?.Dispose();
     }
 }
