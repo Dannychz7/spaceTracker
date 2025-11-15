@@ -1,3 +1,25 @@
+@*
+    BulkLaunches.razor
+
+    Purpose:
+        - Displays the next 40 upcoming launches (compact list) using the SpaceDevs
+            API via the project's `SpaceDevsService`.
+        - Each card shows a thumbnail (with robust fallback to a gradient + initials
+            placeholder), brief status, NET, and a link to the detailed launch page.
+
+    Inputs / Dependencies:
+        - Uses model types from `spaceTracker.Models` (SpaceDevs launch models).
+        - Expects helper methods in the same component or code-behind: `GetGradien
+            tStyle`, `GetInitials`, `GetStatusClass`, and `GetStatusTooltip`.
+
+    Behavior / Notes:
+        - Images use onload/onerror handlers so broken/missing images fall back to
+            the gradient initials placeholder instead of showing raw alt text.
+        - The page requests the next 40 launches and renders them in a compact
+            grid/list; detail links navigate to `/launch/{id}`.
+        - Keep this header updated if you change data sources or helper names.
+*@
+
 @page "/bulklaunches"
 @using spaceTracker.Models
 @rendermode InteractiveServer

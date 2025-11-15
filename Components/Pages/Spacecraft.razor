@@ -1,3 +1,25 @@
+@*
+    Spacecraft.razor
+
+    Purpose:
+        - Displays and explores spacecraft data stored locally (DB) and fetched from
+            the SpaceDevs API via `SpaceDevsService`.
+        - Provides search, sort, grid/list view, an expandable details card, and a
+            simple SQL console for read-only SELECT queries against the local DB.
+
+    Inputs / Dependencies:
+        - Injected: `SpaceTrackerDbContext _context` for SQL console access and
+            `SpaceDevsService spaceDevsService` for API-backed pagination.
+        - Uses `spaceTracker.Models.Spacecraft` to render cards and details.
+
+    Behavior / Notes:
+        - The SQL console intentionally restricts to safe SELECT queries; keep the
+            whitelist/blacklist in sync with security policy.
+        - Images fall back to a placeholder when missing. Large page sizes are used
+            (PageSize = 500) for initial loads; consider lowering if memory becomes
+            an issue.
+*@
+
 @page "/spacecraft"
 @using spaceTracker.Models
 @using System.Text.RegularExpressions;

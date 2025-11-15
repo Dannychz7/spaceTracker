@@ -1,4 +1,29 @@
-﻿@implements IDisposable
+﻿@*
+    Astronauts.razor
+
+    Purpose:
+        - Renders a browsable list of astronauts fetched from the SpaceDevs API via
+            the injected `SpaceDevsService`.
+        - Provides search (debounced), a 5-item search-preview, paging (Load More),
+            and a simple card UI showing profile image, agency, stats, timeline and
+            social links.
+
+    Inputs / Dependencies:
+        - Injected: `SpaceDevsService spaceDevsService` (used to fetch/paginate data).
+        - Reads model: `Astronaut` from `spaceTracker.Models`.
+
+    Behavior / Notes:
+        - Uses a debounce timer for search input and falls back to thumbnails/images
+            when available. Broken images switch to thumbnail if provided.
+        - Search is performed by calling the SpaceDevs API via the injected
+            `SpaceDevsService` (requests use the API's search/pagination parameters).
+            This component does not execute SQL against a local database for
+            search queries; results are kept in-memory in the `astronauts` list.
+        - The component implements IDisposable to clean up the debounce timer.
+        - The CSS for this page is AI generated.
+*@
+
+@implements IDisposable
 @page "/astronauts"
 @using spaceTracker.Models
 @using spaceTracker.Services

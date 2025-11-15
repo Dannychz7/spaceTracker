@@ -1,3 +1,24 @@
+@*
+    LaunchDetail.razor
+
+    Purpose:
+        - Shows detailed information for a single upcoming launch retrieved from
+            the SpaceDevs API via the injected `spaceDevsService`.
+        - Displays mission info, rocket & provider, pad details, countdown, and
+            a right-side summary card with provider, coordinates and countdown.
+
+    Inputs / Dependencies:
+        - Route parameter: `{id}` (launch id used with `spaceDevsService.GetLaunchByIdAsync`).
+        - Uses helper methods in the component: `GetGradientStyle`, `GetInitials`,
+            `GetContrastColor`, `GetStatusClass`, and `GetStatusTooltip`.
+
+    Behavior / Notes:
+        - Starts a timer to update the NET countdown every second and disposes it
+            on component disposal.
+        - Uses provider abbreviations/names for initials when rendering placeholders.
+        - Keep this header updated if helper names or data sources change.
+*@
+
 @page "/launch/{id}"
 @using spaceTracker.Models
 @rendermode InteractiveServer
