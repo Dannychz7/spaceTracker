@@ -165,19 +165,19 @@ The app automatically:
 
 <h2>Screenshots</h2>
 <p align="center">
-  <img src="Screenshots/2D.png" width="30%" />
-  <img src="Screenshots/bulklaunches.png" width="30%" />
-  <img src="Screenshots/buzzAldrin.png" width="30%" />
+  <img src="screenshots/2D.png" width="30%" />
+  <img src="screenshots/bulklaunches.png" width="30%" />
+  <img src="screenshots/buzzAldrin.png" width="30%" />
 </p>
 
 <p align="center">
-  <img src="Screenshots/home.png" width="30%" />
-  <img src="Screenshots/programs.png" width="30%" />
-  <img src="Screenshots/rawData.png" width="30%" />
+  <img src="screenshots/home.png" width="30%" />
+  <img src="screenshots/programs.png" width="30%" />
+  <img src="screenshots/rawData.png" width="30%" />
 </p>
 
 <p align="center">
-  <img src="Screenshots/spacecraft.png" width="30%" />
+  <img src="screenshots/spacecraft.png" width="30%" />
 </p>
 
 
