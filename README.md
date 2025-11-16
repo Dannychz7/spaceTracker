@@ -162,8 +162,6 @@ The app automatically:
 ---
 
 ## Screenshots
-
-<h2>Screenshots</h2>
 <p align="center">
   <img src="screenshots/2D.png" width="30%" />
   <img src="screenshots/bulklaunches.png" width="30%" />
