@@ -1,3 +1,12 @@
+// SpacecraftEntity
+// -----------------
+// Represents a spacecraft record stored in the local database, including core identifying
+// details and additional JSON-backed configuration and image metadata retrieved from external
+// APIs. JSON fields are saved as TEXT for storage efficiency and automatically deserialized
+// into strongly typed objects when accessed.
+// Author: Daniel Chavez 
+// Last Updated: November 2025
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;

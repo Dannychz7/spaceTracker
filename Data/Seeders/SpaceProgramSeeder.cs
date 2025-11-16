@@ -1,3 +1,11 @@
+// SpaceProgramSeeder
+// -------------------
+// Populates and updates space program data in the local database using the SpaceDevs API,
+// enforcing a 7-day refresh interval. It handles both new inserts and updates to existing
+// programs, with custom image overrides for specific programs like Luna and Polaris.
+// Author: Daniel Chavez 
+// Last Updated: November 2025
+
 using Microsoft.EntityFrameworkCore;
 using spaceTracker.Data.Entities;
 using spaceTracker.Models;

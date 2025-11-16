@@ -1,3 +1,11 @@
+// SpaceTrackerDbContext
+// ----------------------
+// Represents the Entity Framework Core database context for the SpaceTracker application,
+// managing tables for space programs, spacecraft, and astronauts. Configures table names,
+// column mappings, and JSON storage for efficient retrieval and persistence of complex data.
+// Author: Daniel Chavez 
+// Last Updated: November 2025
+
 using Microsoft.EntityFrameworkCore;
 using spaceTracker.Data.Entities;
 

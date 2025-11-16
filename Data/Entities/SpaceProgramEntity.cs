@@ -1,3 +1,12 @@
+// SpaceProgramEntity
+// -------------------
+// Represents a space program stored in the local database, including metadata such as its
+// name, duration, description, and associated agencies. Image and agency data are stored
+// as JSON for flexibility and automatically deserialized into strongly typed objects
+// when accessed.
+// Author: Daniel Chavez 
+// Last Updated: November 2025
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

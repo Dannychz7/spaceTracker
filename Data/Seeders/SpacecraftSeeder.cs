@@ -1,3 +1,11 @@
+// SpacecraftSeeder
+// -----------------
+// Populates and refreshes spacecraft data in the local database using the SpaceDevs API,
+// enforcing a 7-day update interval to avoid unnecessary API calls. It adds new spacecraft
+// in batches and skips existing records to maintain database consistency.
+// Author: Daniel Chavez 
+// Last Updated: November 2025
+
 using Microsoft.EntityFrameworkCore;
 using spaceTracker.Data.Entities;
 using spaceTracker.Models;

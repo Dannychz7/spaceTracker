@@ -1,3 +1,12 @@
+// AstronautSeeder
+// ----------------
+// Periodically populates and refreshes astronaut data in the local database using the
+// SpaceDevs API, enforcing a 7-day TTL to minimize unnecessary network calls.
+// Supports incremental updates by detecting existing records, refreshing timestamps,
+// and inserting new astronaut entries in batches until all pages are retrieved.
+// Author: Daniel Chavez 
+// Last Updated: November 2025
+
 using Microsoft.EntityFrameworkCore;
 using spaceTracker.Data.Entities;
 using spaceTracker.Models;

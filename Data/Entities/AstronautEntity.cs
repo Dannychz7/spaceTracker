@@ -1,3 +1,12 @@
+// AstronautEntity
+// ----------------
+// Represents a fully expanded astronaut record stored in the local database, combining
+// basic attributes with rich JSON-backed metadata retrieved from external APIs. JSON fields
+// are stored as TEXT for efficiency and automatically deserialized into strongly typed
+// objects for use throughout the application.
+// Author: Daniel Chavez 
+// Last Updated: November 2025
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
