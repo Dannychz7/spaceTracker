@@ -163,14 +163,23 @@ The app automatically:
 
 ## Screenshots
 
-*(Add images here later)*
-![2D Dashboard](Screenshots/2D.png)
-![Bulk Launches](Screenshots/bulklaunches.png)
-![Buzz Aldrin](Screenshots/buzzAldrin.png)
-![Home Pages](Screenshots/home.png)
-![Space Programs](Screenshots/programs.png)
-![Raw Data](Screenshots/rawData.png)
-![Space craft](Screenshots/spacecraft.png)
+<h2>Screenshots</h2>
+<p align="center">
+  <img src="Screenshots/2D.png" width="30%" />
+  <img src="Screenshots/bulklaunches.png" width="30%" />
+  <img src="Screenshots/buzzAldrin.png" width="30%" />
+</p>
+
+<p align="center">
+  <img src="Screenshots/home.png" width="30%" />
+  <img src="Screenshots/programs.png" width="30%" />
+  <img src="Screenshots/rawData.png" width="30%" />
+</p>
+
+<p align="center">
+  <img src="Screenshots/spacecraft.png" width="30%" />
+</p>
+
 
 ---
 
