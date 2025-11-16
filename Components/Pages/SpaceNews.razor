@@ -1,0 +1,117 @@
+@page "/news"
+@using spaceTracker.Models
+@using spaceTracker.Services
+@inject SpaceNewsService spaceNewsService
+@rendermode InteractiveServer
+
+<PageTitle>Space News</PageTitle>
+
+<div class="space-news-container">
+    <h1>Space News</h1>
+    <p class="subtitle">Latest articles from space news sources</p>
+
+    @if (newsSites != null && newsSites.Any())
+    {
+        <div class="news-sites-banner">
+            <div class="news-sites-scroll">
+                @foreach (var site in newsSites)
+                {
+                    <span class="news-site-name">@site</span>
+                }
+                @foreach (var site in newsSites)
+                {
+                    <span class="news-site-name">@site</span>
+                }
+            </div>
+        </div>
+    }
+
+    @if (isLoading)
+    {
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading news...</p>
+        </div>
+    }
+    else if (errorMessage != null)
+    {
+        <div class="error-message">@errorMessage</div>
+    }
+    else if (articles != null && articles.Any())
+    {
+        <div class="news-grid">
+            @foreach (var article in articles)
+            {
+                <div class="news-card">
+                    @if (!string.IsNullOrEmpty(article.ImageUrl))
+                    {
+                        <img src="@article.ImageUrl" alt="@article.Title" class="news-image" />
+                    }
+                    <div class="news-content">
+                        <h3>@article.Title</h3>
+                        <p class="news-meta">
+                            <span class="news-site">@article.NewsSite</span>
+                            <span class="news-date">@article.PublishedAt?.ToString("MMM d, yyyy")</span>
+                        </p>
+                        <p class="news-summary">@article.Summary</p>
+                        <a href="@article.Url" target="_blank" class="read-more">Read full article →</a>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <div class="load-more-container">
+            <button class="load-more-btn" @onclick="LoadMore" disabled="@isLoadingMore">
+                @(isLoadingMore ? "Loading..." : "Load More")
+            </button>
+        </div>
+    }
+    else
+    {
+        <p>No articles found.</p>
+    }
+</div>
+
+@code {
+    private List<SpaceNewsArticle> articles = new();
+    private List<string>? newsSites;
+    private bool isLoading = true;
+    private bool isLoadingMore = false;
+    private string? errorMessage;
+    private int offset = 0;
+    private const int PageSize = 10;
+
+    protected override async Task OnInitializedAsync()
+    {
+        newsSites = await spaceNewsService.GetNewsSitesAsync();
+        await LoadArticles();
+    }
+
+    private async Task LoadArticles()
+    {
+        try
+        {
+            var newArticles = await spaceNewsService.GetArticlesAsync(PageSize, offset);
+            if (newArticles != null)
+            {
+                articles.AddRange(newArticles);
+                offset += PageSize;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load news: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadMore()
+    {
+        isLoadingMore = true;
+        await LoadArticles();
+        isLoadingMore = false;
+    }
+}
