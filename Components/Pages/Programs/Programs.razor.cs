@@ -1,3 +1,9 @@
+// This component handles incremental loading of space program data by fetching items in batches and preventing 
+// duplicates through ID tracking. Each new batch is merged, sorted by start date, and displayed as the user scrolls 
+// or triggers additional loads. Error handling and UI state updates ensure smooth, continuous data retrieval.
+// Author: Daniel Chavez
+// Last Updated: November 2025
+
 using Microsoft.AspNetCore.Components;
 using spaceTracker.Models;
 using spaceTracker.Services;
