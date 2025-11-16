@@ -1,3 +1,7 @@
+// Model class for Space Devs API responses
+// Author: Daniel Chavez 
+// Last Updated: November 2025
+
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;

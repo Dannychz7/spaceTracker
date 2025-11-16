@@ -1,3 +1,15 @@
+// CacheRefresherService
+// ---------------------
+// This background service periodically refreshes cached data used by the application,
+// including:
+//   • Upcoming launch data from SpaceDevs
+//   • Current ISS position from N2YO
+//   • Weather data for launch pads
+//
+// The service runs every 10 minutes, creating a scoped DI container on each cycle.
+// Each refresh task logs its success or failures, ensuring external API calls are
+// updated regularly without blocking the main web application.
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

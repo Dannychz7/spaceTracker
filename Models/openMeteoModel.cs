@@ -1,4 +1,7 @@
-// Weather API Models
+// Model class for Open Meteo API responses
+// Author: Daniel Chavez 
+// Last Updated: November 2025
+
 namespace spaceTracker.Models;
 using System.Text.Json.Serialization;
 

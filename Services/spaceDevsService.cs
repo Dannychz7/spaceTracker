@@ -1,3 +1,13 @@
+// ---------------------------------------------------------------------------
+// SpaceDevsService: A comprehensive service that integrates with The SpaceDevs
+// API to retrieve launch data, event information, astronaut/agency details,
+// and synchronizes selected entries into the application's database. This
+// service acts as the main data layer for real-time and historical spaceflight
+// information consumed by the entire application.
+// Author: Daniel Chavez 
+// Last Updated: November 2025
+// ---------------------------------------------------------------------------
+
 using spaceTracker.Models;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
