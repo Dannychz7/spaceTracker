@@ -26,6 +26,9 @@ builder.Services.AddHttpClient<SpaceDevsService>();
 builder.Services.AddTransient<CesiumService>();
 builder.Services.AddScoped<SpaceProgramSeeder>();
 
+builder.Services.AddScoped<SpaceNewsService>();
+builder.Services.AddHttpClient<SpaceNewsService>();
+
 // Register EF Core with SQLite
 builder.Services.AddDbContext<SpaceTrackerDbContext>(options =>
     options.UseSqlite("Data Source=spaceTracker.db"));
