@@ -9,6 +9,8 @@
 // The service runs every 10 minutes, creating a scoped DI container on each cycle.
 // Each refresh task logs its success or failures, ensuring external API calls are
 // updated regularly without blocking the main web application.
+// Author: Daniel Chavez
+// Last Updated: November 2025
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

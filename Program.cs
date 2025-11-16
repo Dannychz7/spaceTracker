@@ -1,3 +1,9 @@
+// This file configures the core services and application pipeline for the SpaceTracker project, 
+// registering all API clients, database context, background services, and data seeders. On startup, 
+// it initializes and populates the SQLite database with programs, spacecraft, and astronaut data. It 
+// then builds and runs the Razor Components app with HTTPS, error handling, and interactive 
+// server-side rendering enabled.
+
 using spaceTracker.Components;
 using spaceTracker.Services;
 using Microsoft.EntityFrameworkCore;

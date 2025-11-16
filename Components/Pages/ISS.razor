@@ -83,7 +83,7 @@ offering a complete snapshot of the ISS at any moment.
                         </div>
                         <div class="position-item">
                             <span class="label">Velocity</span>
-                            <span class="value">~7.66 km/s</span>
+                            <span class="value">~7.66 km/s</span> 
                         </div>
                     </div>
                     
@@ -388,7 +388,7 @@ offering a complete snapshot of the ISS at any moment.
     private RadioPassesResponse? issRadioPasses;
     private TleResponse? issTLE;
     
-    private bool isInitialLoading = true; // Renamed from 'isLoading'
+    private bool isInitialLoading = true; // Renamed from isLoading
     private bool isRefreshing = false;    
     private bool hasError = false;
 
@@ -403,8 +403,6 @@ offering a complete snapshot of the ISS at any moment.
     private double currentLng => -71.8023;
     private double currentAlt => 0;
     private string currentLocationName => "Worcester, MA";
-
-
 
     // Major cities dictionary
     private readonly Dictionary<int, (string Name, double Lat, double Lng, double Alt)> locations = new()
@@ -464,7 +462,7 @@ offering a complete snapshot of the ISS at any moment.
 
     private async Task LoadAllData()
     {
-        // This method is for the *initial* load or a *location change*.
+        // This method is for the *initial* load or a *location change*
         // It's responsible for turning off the main page spinner.
         hasError = false;
 
@@ -507,7 +505,6 @@ offering a complete snapshot of the ISS at any moment.
 
     private async Task LoadWeatherData()
     {
-        // This method's local 'isWeatherLoading' flag is fine.
         isWeatherLoading = true;
         hasWeatherError = false;
 
