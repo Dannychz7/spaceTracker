@@ -12,6 +12,9 @@ SpaceTracker is an interactive, data-driven space exploration platform built wit
 - **OpenMeteo API** – Weather for ISS observer
 - **Space News API** – Space industry news and articles
 
+### HOW TO ACCESS WEBSITE ###
+- The website should automatically host itself on: http://localhost:5094/ 
+
 ---
 ## Project Architecture EXPLAINED
 spaceTracker/
