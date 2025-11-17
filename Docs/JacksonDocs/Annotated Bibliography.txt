@@ -1,2 +1,10 @@
 Annotated Bibliography
 
+Code Monkey. “Learn C# BASICS in 10 MINUTES!” YouTube, uploaded by Code Monkey, 6 May 2020, https://www.youtube.com/watch?v=IFayQioG71A 
+	Used to gain a fundamental understanding of what C# is, including how one would write the very basic code if one were to code a project centered on the language. This was mainly to prime myself for formatting and seeing what the difference was in comparison to C or C++, which is isn’t too drastic to figure out. Instead, the main difference is figuring out how the .NET Framework played into the language.
+
+ChatGPT. Various Prompts. GPT 5-mini, OpenAI, October-November
+	The use of AI was primarily to determine how the program's frontend would look to the user; in other words, it was mainly used to develop the website's CSS and visual presentation. Other uses included the scouring of bugs before pushing each new iteration of a page, and the development of the search bar feature on the Astronauts page, which I wasn’t too sure how to implement.
+
+Microsoft. Various Articles. Microsoft C# Guide, https://learn.microsoft.com/en-us/dotnet/csharp/
+  Used this website as a hub for learning and checking in on various C# intricacies that aren't covered in the video mentioned above. Specifically, used to learn about the .NET Framework and how it differentiates C# from its sister languages. Also utilized the videos and training to get various insight and practice on doing the code hands on rather than just relying on my fundamental knowledge of C.
