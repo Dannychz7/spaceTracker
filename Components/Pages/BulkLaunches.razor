@@ -17,7 +17,7 @@
             the gradient initials placeholder instead of showing raw alt text.
         - The page requests the next 40 launches and renders them in a compact
             grid/list; detail links navigate to `/launch/{id}`.
-        - Keep this header updated if you change data sources or helper names.
+        - The CSS for this page is AI generated.
 *@
 
 @page "/bulklaunches"
@@ -25,6 +25,16 @@
 @rendermode InteractiveServer
 
 <PageTitle>Upcoming Launches (Next 40)</PageTitle>
+
+@*
+    Notes:
+        - This page requests the next 40 upcoming launches from SpaceDevs (via
+            the backing service). The UI is intentionally compact to make scanning
+            through launches fast on a single page.
+        - Image handling: we render a gradient + initials placeholder first and
+            rely on image onload/onerror to toggle the real image visibility so that
+            broken image URLs never display raw alt text.
+*@
 
 <div class="bulk-launches-container">
     <div class="header-row">
@@ -34,6 +44,7 @@
 
     @if (isLoading)
     {
+        @* Loading state: spinner shown while the service request completes *@
         <div class="loading">
             <div class="spinner"></div>
             <p>Loading launches…</p>
@@ -45,6 +56,8 @@
     }
     else
     {
+        @* Render the list of launches. Each card is compact — image on the left,
+           details on the right (status, NET, actions). *@
         <div class="launch-list">
             @foreach (var launch in launches)
             {
@@ -69,11 +82,13 @@
                     </div>
 
                     <div class="launch-compact-body">
+                        @* Title and quick metadata. Status badge color is computed by GetStatusClass *@
                         <div class="launch-compact-title">
                             <h4>@launch.Name</h4>
                             <span class="status-badge @GetStatusClass(launch.Status?.Abbrev ?? launch.Status?.Name)" title="@GetStatusTooltip(launch.Status?.Abbrev ?? launch.Status?.Name)">@launch.Status?.Name</span>
                         </div>
 
+                        @* NET (No Earlier Than) displayed in a compact format; falls back to TBD *@
                         <div class="launch-compact-net">@(launch.Net?.ToString("MMM d, HH:mm") ?? "TBD")</div>
 
                         <div class="launch-compact-actions">
