@@ -5,63 +5,6 @@
 SpaceTracker is an interactive, data-driven space exploration platform built with .NET 8, Blazor, Entity Framework Core, and CesiumJS. It provides real-time tracking of satellites, launches, astronauts, spacecraft, and historical space programs—all powered by multiple live APIs and a locally persisted SQLite database.
 
 ---
-
-## Features
-
-### Real-Time Tracking
-- Live ISS position tracking
-- Satellite positions & orbital paths
-- Satellite passes, visibility windows, and observer-based queries
-- Real-time launch events, mission details, and countdowns
-
-### Interactive Dashboards
-- **3D Dashboard** – Cesium-based globe showing ISS, satellites, launch sites
-- **2D Dashboard** – Lightweight map showing next launch sites
-- Smooth animations, markers, and overlays
-
-### Astronaut Database
-- Full astronaut profiles (SpaceDevs API)
-- Biography, missions, agencies, timelines
-- Cached locally in SQLite with auto-refresh
-
-### Spacecraft Browser
-- Specifications, configuration, mission history
-- High-resolution images
-- Deep metadata for spacecraft around the world
-
-### Launch Schedules
-- Global upcoming launches
-- Mission details, windows, providers
-- Paginated/bulk view for extended schedules
-
-### Historical Programs Timeline
-- Mercury → Gemini → Apollo → Shuttle → ISS → Artemis
-- Images, descriptions, agencies, start/end dates
-- Beautiful chronological timeline UI
-
-### Raw API Viewer
-- Live JSON responses from all services
-- Weather, launches, ISS position, satellite position, visual passes
-- Useful for debugging, transparency, and development
-
----
-
-## Tech Stack
-
-### Frontend / UI
-- **Blazor Server** (Razor Components)
-- **CesiumJS** (3D Globe)
-- Custom CSS for all pages
-
-### Backend
-- **ASP.NET Core 9**
-- **HttpClient Services** for all external APIs
-- **Background data caching service**
-- **EF Core + SQLite** persistence for:
-  - Astronauts
-  - Spacecraft
-  - Space Programs
-
 ### APIs Used
 - **N2YO API** – ISS position, satellites, passes
 - **SpaceDevs API** – Astronauts, spacecraft, programs
@@ -69,41 +12,106 @@ SpaceTracker is an interactive, data-driven space exploration platform built wit
 - **OpenMeteo API** – Weather for ISS observer
 
 ---
+## Project Architecture EXPLAINED
+spaceTracker/
+├── BackgroundServices/        -> Hosted services (e.g., auto-refreshing cached API data)
+│
+├── Components/               -> All Blazor UI components
+│   ├── Layout/               -> Shared layouts + navigation (global UI structure)
+│   ├── Pages/                -> Actual app pages (ISS, Launches, Astronauts, etc.)
+│   ├── Routes.razor          -> Defines app routing
+│   └── _Imports.razor        -> Global using statements for Razor components
+│
+├── Data/                     -> Database and ORM layer
+│   ├── Entities/             -> EF Core database models (tables)
+│   ├── Seeders/              -> Initial DB population code
+│   └── SpaceTrackerDbContext -> EF Core context + DB config
+│
+├── Models/                   -> C# models for API responses + structured data
+│
+├── Services/                 -> API service layer (N2YO, SpaceDevs, Weather, Launches)
+│                             -> Handles all external data fetching + validation
+│
+├── wwwroot/                  -> Static frontend assets (CSS, JS interop, images)
+│
+├── Program.cs                -> App bootstrap + dependency injection setup
+├── spaceTracker.csproj       -> Project configuration
+├── spaceTracker.db           -> Local SQLite database
+└── README.md                 -> Project documentation
 
-## Project Architecture
 
+## PROJECT FILES EXPLAINED AND HOW MUCH WAS AI GENERATED AND WHO CREATED THEM
 ```
 spaceTracker/
-│
-├── Components/
-│   ├── Pages/
-│   │   ├── Home.razor
-│   │   ├── Dashboard3D.razor
-│   │   ├── Dashboard2D.razor
+├── BackgroundServices - 
+│   └── CacheRefresherService.cs
+├── Components
+│   ├── App.razor - (AUTO GENERATED)
+│   ├── Layout
+│   │   ├── MainLayout.razor
+│   │   ├── MainLayout.razor.css- (AI: 100%)
+│   │   ├── NavMenu.razor
+│   │   └── NavMenu.razor.css - (AI: 100%)
+│   ├── Pages
 │   │   ├── Astronauts.razor
-│   │   ├── Spacecraft.razor
+│   │   ├── Astronauts.razor.css - (AI: 100%)
 │   │   ├── BulkLaunches.razor
+│   │   ├── BulkLaunches.razor.cs
+│   │   ├── BulkLaunches.razor.css - (AI: 100%)
+│   │   ├── Dasboard2D.razor
+│   │   ├── Dasboard2D.razor.css - (AI: 100%)
+│   │   ├── Dashboard3D.razor
+│   │   ├── Dashboard3D.razor.css - (AI: 100%)
+│   │   ├── Home.razor
+│   │   ├── Home.razor.css - (AI: 100%)
+│   │   ├── ISS.razor - (AI: 30%, Daniel: 70% — Live ISS tracking UI + async updates)
+│   │   ├── ISS.razor.css - (AI: 100%)
 │   │   ├── LaunchDetail.razor
-│   │   ├── ISS.razor
-│   │   ├── RawData.razor
-│   │   └── Programs/
-│   │       └── Programs.razor
-│   └── Shared/...
-│
-├── Data/
-│   ├── SpaceTrackerDbContext.cs
-│   ├── Entities/
-│   ├── Seeders/
-│   └── Migrations/
-│
-├── Services/
-│   ├── weatherService.cs
-│   ├── RocketLaunchLiveService.cs
-│   ├── n2yoService.cs
-│   ├── SpaceDevsService.cs
-│   └── CesiumService.cs
-│
-└── Program.cs (service registration + DB seeding)
+│   │   ├── LaunchDetail.razor.css - (AI: 100%)
+│   │   ├── Programs
+│   │   │   ├── Programs.razor - (AI: 70%, Daniel: 30% — Program list display + UI layout)
+│   │   │   ├── Programs.razor.cs - (AI: 20%, Daniel: 80% — Sorting, loading, filtering logic)
+│   │   │   └── Programs.razor.css - (AI: 100%)
+│   │   ├── RawData.razor (AI: 100%)
+│   │   ├── SpaceNews.razor
+│   │   ├── SpaceNews.razor.css - (AI: 100%)
+│   │   ├── Spacecraft.razor - (AI: 30%, Daniel: 70% — Spacecraft data display and detail UI)
+│   │   └── Spacecraft.razor.css - (AI: 100%)
+│   ├── Routes.razor
+│   └── _Imports.razor 
+├── Data
+│   ├── Entities
+│   │   ├── AstronautEntity.cs - (AI: 20%, Daniel: 80% — DB model mapping astronaut fields)
+│   │   ├── SpaceProgramEntity.cs - (AI: 20%, Daniel: 80% — DB structure for space programs)
+│   │   └── SpacecraftEntity.cs - (AI: 20%, Daniel: 80% — DB entity for spacecraft records)
+│   ├── Seeders
+│   │   ├── AstronautSeeder.cs - (AI: 90%, Daniel: 10% — Seeds astronaut data into DB)
+│   │   ├── SpaceProgramSeeder.cs - (AI: 90%, Daniel: 10% — Seeds program data into DB)
+│   │   └── SpacecraftSeeder.cs - (AI: 90%, Daniel: 10% — Seeds spacecraft entries into DB)
+│   └── SpaceTrackerDbContext.cs - (Daniel: 100% — Controls DB sets + EF Core configuration)
+├── Models
+│   ├── n2yoModel.cs - (AI: 50%, Daniel: 50% — ISS/N2YO API response model)
+│   ├── openMeteoModel.cs - (Daniel: 100% — Weather API model from OpenMeteo)
+│   ├── rocketLiveModel.cs - (Daniel: 100% — Rocket launch API data model)
+│   ├── spaceDevsModel.cs - (AI: 80%, Daniel: 20% — SpaceDevs launches/programs model)
+│   └── spaceNewsModel.cs
+├── Program.cs - (AUTOGENERATED: 50%, Daniel: 50% - Start point for the entire project)
+├── README.md
+├── Services
+│   ├── cesiumService.cs
+│   ├── n2yoService.cs - (AI: 50%, Daniel: 50% — Fetches ISS location + satellite data)
+│   ├── openMeteoService.cs - (Daniel: 100% — Handles weather API calls)
+│   ├── rocketLaunchLiveService.cs - (Daniel: 100% — Retrieves live + upcoming rocket launches)
+│   ├── spaceDevsService.cs - (AI: 50%, Daniel: 50% — Loads launches, spacecraft, and program data)
+│   └── spaceNewsService.cs
+├── spaceTracker.csproj - (AUTO GENERATED)
+├── spaceTracker.db - (AUTO GENERATED)
+└── wwwroot
+    ├── ISS_spacecraft_model_1.png
+    ├── app.css - (AUTO GENERATED)
+    ├── cesium-interop.js
+    ├── favicon.png - (AUTO GENERATED)
+    └── world_map.jpg
 ```
 
 ---
@@ -124,172 +132,7 @@ spaceTracker/
 
 ---
 
-## Database & Seeding
-
-On startup, the app automatically:
-- Seeds Space Programs
-- Seeds Spacecraft
-- Seeds Astronauts
-
-All entities store JSON fields (`StatusJson`, `ImageJson`, `AgenciesJson`, etc.) with computed `[NotMapped]` models for structured access.
-
----
-
-## Running the Project
-
-### Prerequisites
-- .NET 9 SDK
-- SQLite installed
-- Cesium Ion key (optional for 3D globe)
-
-### Steps
-
-```bash
-git clone <repo>
-cd spaceTracker
-dotnet restore
-dotnet run
-```
-
-The app automatically:
-- Registers all API services
-- Builds the SQLite database
-- Populates seed data
-- Starts the Blazor Server app
-
-**Open your browser at:** `https://localhost:5094`
-
----
-
-## Screenshots
-<p align="center">
-  <img src="screenshots/2D.png" width="30%" />
-  <img src="screenshots/bulklaunches.png" width="30%" />
-  <img src="screenshots/buzzAldrin.png" width="30%" />
-</p>
-
-<p align="center">
-  <img src="screenshots/home.png" width="30%" />
-  <img src="screenshots/programs.png" width="30%" />
-  <img src="screenshots/rawData.png" width="30%" />
-</p>
-
-<p align="center">
-  <img src="screenshots/spacecraft.png" width="30%" />
-</p>
-
-
----
-
 ## Contact
-
 **Created by Lead Devolper: Daniel Chavez, Full-Stack Devolper: Anthony Petrosino, and Front-End Devolper: Jackson Wang**  
-College of the Holy Cross – Computer Science
-
-For inquiries, improvements, or collaboration, feel free to reach out!
 
 
-
-
-
-.
-├── BackgroundServices
-│   └── CacheRefresherService.cs
-├── Components
-│   ├── App.razor
-│   ├── Layout
-│   │   ├── MainLayout.razor
-│   │   ├── MainLayout.razor.css
-│   │   ├── NavMenu.razor
-│   │   └── NavMenu.razor.css
-│   ├── Pages
-│   │   ├── Astronauts.razor
-│   │   ├── Astronauts.razor.css
-│   │   ├── BulkLaunches.razor
-│   │   ├── BulkLaunches.razor.cs
-│   │   ├── BulkLaunches.razor.css
-│   │   ├── Dasboard2D.razor
-│   │   ├── Dasboard2D.razor.css
-│   │   ├── Dashboard3D.razor
-│   │   ├── Dashboard3D.razor.css
-│   │   ├── Home.razor
-│   │   ├── Home.razor.css
-│   │   ├── ISS.razor
-│   │   ├── ISS.razor.css
-│   │   ├── LaunchDetail.razor
-│   │   ├── LaunchDetail.razor.css
-│   │   ├── Programs
-│   │   │   ├── Programs.razor
-│   │   │   ├── Programs.razor.cs
-│   │   │   └── Programs.razor.css
-│   │   ├── RawData.razor
-│   │   ├── SpaceNews.razor
-│   │   ├── SpaceNews.razor.css
-│   │   ├── Spacecraft.razor
-│   │   └── Spacecraft.razor.css
-│   ├── Routes.razor
-│   └── _Imports.razor
-├── Data
-│   ├── Entities
-│   │   ├── AstronautEntity.cs
-│   │   ├── SpaceProgramEntity.cs
-│   │   └── SpacecraftEntity.cs
-│   ├── Seeders
-│   │   ├── AstronautSeeder.cs
-│   │   ├── SpaceProgramSeeder.cs
-│   │   └── SpacecraftSeeder.cs
-│   └── SpaceTrackerDbContext.cs
-├── Docs
-│   ├── AnthonyDocs
-│   │   ├── Annotated Bibliography, 324 Project.pdf
-│   │   ├── Anthony.md
-│   │   └── Collaboration Log, 324 Project.pdf
-│   ├── C# Report - Chavez, Petrosino, Wang - Google Docs.pdf
-│   ├── DanielDocs
-│   │   ├── Annotated Bibliography for SpaceTracker - Chavez.pdf
-│   │   └── Collaboration log for Final Project - Chavez.pdf
-│   └── JacksonDocs
-│       ├── Annotated Bibliography.txt
-│       └── collaborationlog.txt
-├── Models
-│   ├── n2yoModel.cs
-│   ├── openMeteoModel.cs
-│   ├── rocketLiveModel.cs
-│   ├── spaceDevsModel.cs
-│   └── spaceNewsModel.cs
-├── Program.cs
-├── Properties
-│   └── launchSettings.json
-├── README.md
-├── Services
-│   ├── cesiumService.cs
-│   ├── n2yoService.cs
-│   ├── openMeteoService.cs
-│   ├── rocketLaunchLiveService.cs
-│   ├── spaceDevsService.cs 
-│   └── spaceNewsService.cs
-├── apiSecurity.txt
-├── appsettings.Development.json
-├── appsettings.json
-├── screenshots
-│   ├── 2D.png
-│   ├── ISS.png
-│   ├── bulklaunches.png
-│   ├── buzzAldrin.png
-│   ├── home.png
-│   ├── programs.png
-│   ├── rawData.png
-│   └── spacecraft.png
-├── spaceTracker.csproj
-├── spaceTracker.db
-├── spaceTracker.db-shm
-├── spaceTracker.db-wal
-├── spaceTracker.sln
-└── wwwroot
-    ├── ISS_spacecraft_model_1.png
-    ├── app.css
-    ├── cesium-interop.js
-    ├── favicon.png
-    └── world_map.jpg
-
-98 directories, 357 files
