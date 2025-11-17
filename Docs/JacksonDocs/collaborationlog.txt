@@ -1,2 +1,10 @@
 Collaboration Log
 
+Astronauts
+  Skeleton of the code was already made, so all had to do was create code that moved the back end API data to the front end, with the front end's css created by AI. This page intends to display various information about astronauts such as their time in space, a brief description, etc. This used to pull from the API directly, but now uses a database, which is a change made by Daniel to ensure faster loading times. The AI also created the search bar feature used on this page.
+
+BulkLaunches
+  Displays the next 40 launches using the API, which is not based on a database (as it is constantly updating), which leads to slower loading times, but otherwise working as intended. Columns displaying basic information about the launch, including its status and name as well as its launch date. Supplemented by the LaunchDetails page, which dshows more in-depth information about each launch, including the company, location, and copyable coordinates of the site (unfortunately, this also loads quite slowly. Also ended up needing to fix some visual bugs associated with some of the fallback when no images were available.
+
+Spacecraft
+  Made a very basic skeleton of the overall end-product of what the spacecraft page ended up looking like. What I created was essentially the the visual design of the columns of spacecraft with their basic information and borrowed the loading and search features of the astronauts page. A sorting feature for the spacecrafts was also added to further help search for a specific spacecraft. The more detailed aspects such as the SQL search and dropdown menu for each ship was added by Daniel.
