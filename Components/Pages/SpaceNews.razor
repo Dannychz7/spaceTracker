@@ -1,3 +1,12 @@
+@*
+    Purpose: Displays latest space news articles from multiple news sources with images,
+    summaries, and links to full articles. Supports pagination for browsing more content.
+    Inputs / Dependencies: SpaceNewsService for fetching articles and news sites.
+    Behavior / Notes: Shows scrolling banner of news sources, loads 10 articles at a time
+    with "Load More" button for additional content.
+    Author: Anthony Petrosino
+    Last updated: November 2025
+*@
 @page "/news"
 @using spaceTracker.Models
 @using spaceTracker.Services
@@ -8,7 +17,7 @@
 
 <div class="space-news-container">
     <h1>Space News</h1>
-    <p class="subtitle">Latest articles from space news sources</p>
+    <p class="subtitle">Latest articles from the following space news sources</p>
 
     @if (newsSites != null && newsSites.Any())
     {

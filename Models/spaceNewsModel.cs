@@ -1,3 +1,7 @@
+// Model class for using SNAPI for recent space news
+// Author: Anthony Petrosino 
+// Last Updated: November 2025
+
 using System.Text.Json.Serialization;
 
 namespace spaceTracker.Models

@@ -1,3 +1,12 @@
+// -------------------------------------------------------------
+// spaceNewsService: Implements interacting with the SNAPI 
+// (Space News API) to retrieve recent articles from tracked news
+// sources. This class provides helper methods for fetching
+// articles and available news site information.
+// Author: Anthony Petrosino 
+// Last Updated: November 2025
+// -------------------------------------------------------------
+
 using spaceTracker.Models;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
