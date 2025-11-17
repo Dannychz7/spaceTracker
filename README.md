@@ -17,13 +17,13 @@ SpaceTracker is an interactive, data-driven space exploration platform built wit
 spaceTracker/
 ├── BackgroundServices/        -> Hosted services (e.g., auto-refreshing cached API data)
 │
-├── Components/               -> All Blazor UI components
+├── Components/               -> All Blazor UI or webpage components
 │   ├── Layout/               -> Shared layouts + navigation (global UI structure)
 │   ├── Pages/                -> Actual app pages (ISS, Launches, Astronauts, etc.)
 │   ├── Routes.razor          -> Defines app routing
 │   └── _Imports.razor        -> Global using statements for Razor components
 │
-├── Data/                     -> Database and ORM layer
+├── Data/                     -> Database layer
 │   ├── Entities/             -> EF Core database models (tables)
 │   ├── Seeders/              -> Initial DB population code
 │   └── SpaceTrackerDbContext -> EF Core context + DB config
@@ -100,7 +100,7 @@ spaceTracker/
 ├── README.md
 ├── Services
 │   ├── cesiumService.cs - (AI: 20% - basic structure ideas/bug fixes, Anthony: 80% - cesium globe integration service)
-│   ├── n2yoService.cs - (AI: 50%, Daniel: 50% — Fetches ISS location + satellite data)
+│   ├── n2yoService.cs - (AI: 40%, Daniel: 60% — Fetches ISS location + satellite data)
 │   ├── openMeteoService.cs - (Daniel: 100% — Handles weather API calls)
 │   ├── rocketLaunchLiveService.cs - (Daniel: 100% — Retrieves live + upcoming rocket launches)
 │   ├── spaceDevsService.cs - (AI: 50%, Daniel: 50% — Loads launches, spacecraft, and program data)
