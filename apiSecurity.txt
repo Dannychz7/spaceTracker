@@ -11,6 +11,14 @@ Then add secrets one by one:
 Then in appsettings.json, just define the structure (no keys):
 
 {
+    "Logging": {
+    "LogLevel": {
+      "Default": "Debug", 
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+
   "NASA": {
     "ApiUrl": "https://api.nasa.gov/"
   },
