@@ -187,3 +187,109 @@ The app automatically:
 College of the Holy Cross – Computer Science
 
 For inquiries, improvements, or collaboration, feel free to reach out!
+
+
+
+
+
+.
+├── BackgroundServices
+│   └── CacheRefresherService.cs
+├── Components
+│   ├── App.razor
+│   ├── Layout
+│   │   ├── MainLayout.razor
+│   │   ├── MainLayout.razor.css
+│   │   ├── NavMenu.razor
+│   │   └── NavMenu.razor.css
+│   ├── Pages
+│   │   ├── Astronauts.razor
+│   │   ├── Astronauts.razor.css
+│   │   ├── BulkLaunches.razor
+│   │   ├── BulkLaunches.razor.cs
+│   │   ├── BulkLaunches.razor.css
+│   │   ├── Dasboard2D.razor
+│   │   ├── Dasboard2D.razor.css
+│   │   ├── Dashboard3D.razor
+│   │   ├── Dashboard3D.razor.css
+│   │   ├── Home.razor
+│   │   ├── Home.razor.css
+│   │   ├── ISS.razor
+│   │   ├── ISS.razor.css
+│   │   ├── LaunchDetail.razor
+│   │   ├── LaunchDetail.razor.css
+│   │   ├── Programs
+│   │   │   ├── Programs.razor
+│   │   │   ├── Programs.razor.cs
+│   │   │   └── Programs.razor.css
+│   │   ├── RawData.razor
+│   │   ├── SpaceNews.razor
+│   │   ├── SpaceNews.razor.css
+│   │   ├── Spacecraft.razor
+│   │   └── Spacecraft.razor.css
+│   ├── Routes.razor
+│   └── _Imports.razor
+├── Data
+│   ├── Entities
+│   │   ├── AstronautEntity.cs
+│   │   ├── SpaceProgramEntity.cs
+│   │   └── SpacecraftEntity.cs
+│   ├── Seeders
+│   │   ├── AstronautSeeder.cs
+│   │   ├── SpaceProgramSeeder.cs
+│   │   └── SpacecraftSeeder.cs
+│   └── SpaceTrackerDbContext.cs
+├── Docs
+│   ├── AnthonyDocs
+│   │   ├── Annotated Bibliography, 324 Project.pdf
+│   │   ├── Anthony.md
+│   │   └── Collaboration Log, 324 Project.pdf
+│   ├── C# Report - Chavez, Petrosino, Wang - Google Docs.pdf
+│   ├── DanielDocs
+│   │   ├── Annotated Bibliography for SpaceTracker - Chavez.pdf
+│   │   └── Collaboration log for Final Project - Chavez.pdf
+│   └── JacksonDocs
+│       ├── Annotated Bibliography.txt
+│       └── collaborationlog.txt
+├── Models
+│   ├── n2yoModel.cs
+│   ├── openMeteoModel.cs
+│   ├── rocketLiveModel.cs
+│   ├── spaceDevsModel.cs
+│   └── spaceNewsModel.cs
+├── Program.cs
+├── Properties
+│   └── launchSettings.json
+├── README.md
+├── Services
+│   ├── cesiumService.cs
+│   ├── n2yoService.cs
+│   ├── openMeteoService.cs
+│   ├── rocketLaunchLiveService.cs
+│   ├── spaceDevsService.cs 
+│   └── spaceNewsService.cs
+├── apiSecurity.txt
+├── appsettings.Development.json
+├── appsettings.json
+├── screenshots
+│   ├── 2D.png
+│   ├── ISS.png
+│   ├── bulklaunches.png
+│   ├── buzzAldrin.png
+│   ├── home.png
+│   ├── programs.png
+│   ├── rawData.png
+│   └── spacecraft.png
+├── spaceTracker.csproj
+├── spaceTracker.db
+├── spaceTracker.db-shm
+├── spaceTracker.db-wal
+├── spaceTracker.sln
+└── wwwroot
+    ├── ISS_spacecraft_model_1.png
+    ├── app.css
+    ├── cesium-interop.js
+    ├── favicon.png
+    └── world_map.jpg
+
+98 directories, 357 files
