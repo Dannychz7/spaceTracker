@@ -53,10 +53,10 @@ spaceTracker/
 │   │   ├── NavMenu.razor
 │   │   └── NavMenu.razor.css - (AI: 100%)
 │   ├── Pages
-│   │   ├── Astronauts.razor
+│   │   ├── Astronauts.razor (AI: 30% — search bar, Other: 70% — Loading, database search, card UI)
 │   │   ├── Astronauts.razor.css - (AI: 100%)
-│   │   ├── BulkLaunches.razor
-│   │   ├── BulkLaunches.razor.cs
+│   │   ├── BulkLaunches.razor (AI 20% — cleanup, bug fixes, Other: 80% — API fetching, UI, fallback images)
+│   │   ├── BulkLaunches.razor.cs (AI 10% — cleanup, bug fixes, Other: 90% Visual aid, gradiants, card loading)
 │   │   ├── BulkLaunches.razor.css - (AI: 100%)
 │   │   ├── Dasboard2D.razor
 │   │   ├── Dasboard2D.razor.css - (AI: 100%)
@@ -66,7 +66,7 @@ spaceTracker/
 │   │   ├── Home.razor.css - (AI: 100%)
 │   │   ├── ISS.razor - (AI: 30%, Daniel: 70% — Live ISS tracking UI + async updates)
 │   │   ├── ISS.razor.css - (AI: 100%)
-│   │   ├── LaunchDetail.razor
+│   │   ├── LaunchDetail.razor (AI 20% — cleanup, bug fixes, Other: 80% — Timer, coordinates, UI functionality)
 │   │   ├── LaunchDetail.razor.css - (AI: 100%)
 │   │   ├── Programs
 │   │   │   ├── Programs.razor - (AI: 70%, Daniel: 30% — Program list display + UI layout)
