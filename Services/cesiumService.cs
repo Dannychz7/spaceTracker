@@ -1,3 +1,10 @@
+/*
+    Purpose: C# wrapper service for Cesium 3D globe JavaScript interop operations
+    Inputs / Dependencies: IJSRuntime (JS interop), cesium-interop.js module
+    Behavior / Notes: Manages globe initialization, marker operations, and real-time position updates
+    Author: Anthony Petrosino
+    Last updated: November 2025
+*/
 using Microsoft.JSInterop;
 
 namespace spaceTracker.Services;

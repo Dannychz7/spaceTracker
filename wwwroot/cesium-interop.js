@@ -1,3 +1,10 @@
+/*
+    Purpose: JavaScript interop module for CesiumJS 3D globe operations and entity management
+    Inputs / Dependencies: CesiumJS library, cesiumService.cs
+    Behavior / Notes: Manages globe initialization, marker creation/updates, camera controls, and InfoBox link handling
+    Author: Anthony Petrosino
+    Last updated: November 2025
+*/
 let viewer = null;
 let markerPositions = [];
 
