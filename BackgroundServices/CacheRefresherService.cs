@@ -18,6 +18,8 @@ using Microsoft.Extensions.Logging;
 using spaceTracker.Data;
 using spaceTracker.Services;
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography.Xml;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -61,7 +63,7 @@ namespace spaceTracker.BackgroundServices
                 }
 
                 // Wait 10 minutes before next refresh
-                await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken); //change to 0.5 when demoing to show true cache refresh
+                await Task.Delay(TimeSpan.FromMinutes(0.5), stoppingToken); //change to 0.5 when demoing to show true cache refresh
             }
         }
 
@@ -127,4 +129,3 @@ namespace spaceTracker.BackgroundServices
         }
     }
 }
-
