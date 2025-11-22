@@ -106,7 +106,7 @@ spaceTracker/
    ```
 
 6. **Access the application:**  
-   Open your browser and go to `https://localhost:5001` or `http://localhost:5000`.
+   Open your browser and go to `https://localhost:5094` or `http://localhost:5049`.
 
 ---
 
@@ -130,8 +130,8 @@ spaceTracker/
 
 ## Authors
 
-- **Daniel Chavez** – Lead Developer
-- **Anthony Petrosino** – Frontend / Blazor UI Developer
+- **Daniel Chavez** – Project Manager, Lead Developer, and Backend Developer
+- **Anthony Petrosino** – Full Stack Developer / Blazor UI Developer
 - **Jackson Wang** – Frontend / Components & Visuals
 
 ---
@@ -139,5 +139,7 @@ spaceTracker/
 ## License
 
 This project is open-source. See LICENSE for details.
+
+**Archive Notice**: This project is no longer actively maintained as of December 2025. It remains available as a portfolio demonstration and reference implementation. Thank You for viewing.
 
 
