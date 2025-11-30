@@ -31,6 +31,12 @@ public class CesiumService : IAsyncDisposable
         await module.InvokeVoidAsync("updateMarker", entityId, lat, lon);
     }
 
+    public async Task UpdateMarkerDescriptionAsync(string entityId, string description)
+    {
+        var module = await _moduleTask.Value;
+        await module.InvokeVoidAsync("updateMarkerDescription", entityId, description);
+    }
+
     public async Task AddMarkerAsync(double lat, double lon, string name, string description)
     {
         var module = await _moduleTask.Value;

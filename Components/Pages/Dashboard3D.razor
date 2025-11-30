@@ -1,4 +1,4 @@
-﻿@*
+@*
     Purpose: Interactive 3D Cesium globe displaying live ISS tracking and upcoming launch sites
     Inputs / Dependencies: SpaceDevsService (launches), n2yoService (ISS position), CesiumService (3D globe)
     Behavior / Notes: Real-time ISS updates every 5 seconds, clickable launch markers with mission details
@@ -27,11 +27,15 @@
     private SatellitePosition? issPosition;
     private System.Threading.Timer? _timer;
     private string? _issMarkerId;
+    private bool _dataLoaded = false;
+    private bool _globeInitialized = false;
     
     protected override async Task OnInitializedAsync()
     {
         launches = await spaceDevsService.GetUpcomingLaunchesAsync(5);
         issPosition = await n2yoService.GetISSPosition(42.2626, -71.8023, 0);
+        _dataLoaded = true;
+        StateHasChanged();
         
         // Update ISS every 5 seconds
         _timer = new System.Threading.Timer(async _ => await UpdateISSPosition(), null, 5000, 5000);
@@ -39,8 +43,9 @@
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (_dataLoaded && !_globeInitialized)
         {
+            _globeInitialized = true;
             await cesiumService.InitializeGlobeAsync("cesiumContainer");
             
             // Add launch site markers from real data
@@ -87,6 +92,13 @@
         {
             var pos = newPosition.Positions[0];
             await cesiumService.UpdateMarkerAsync(_issMarkerId, pos.Satlatitude, pos.Satlongitude);
+            await cesiumService.UpdateMarkerDescriptionAsync(_issMarkerId,
+                $"<h3>International Space Station</h3>" +
+                $"<b>Altitude:</b> {pos.Sataltitude:F2} km<br/>" +
+                $"<b>Latitude:</b> {pos.Satlatitude:F4}°<br/>" +
+                $"<b>Longitude:</b> {pos.Satlongitude:F4}°<br/><br/>" +
+                $"<b>Live Stream:</b> <a href='https://www.youtube.com/watch?v=fO9e9jnhYK8'>Watch on YouTube</a>"
+            );
             issPosition = newPosition;
         }
     }

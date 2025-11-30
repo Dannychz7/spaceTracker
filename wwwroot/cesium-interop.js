@@ -21,11 +21,32 @@ export function initializeGlobe(containerId) {
         animation: false,
         timeline: false,
         selectionIndicator: false,
-        fullscreenButton: false,
+        fullscreenButton: true,
+        fullscreenElement: document.body,
         creditContainer: document.createElement('div')
     });
     
     viewer.cesiumWidget.creditContainer.style.display = 'none';
+    
+    // Make container fill screen in fullscreen mode
+    document.addEventListener('fullscreenchange', () => {
+        const container = document.getElementById(containerId);
+        if (document.fullscreenElement) {
+            container.style.position = 'fixed';
+            container.style.top = '0';
+            container.style.left = '0';
+            container.style.width = '100vw';
+            container.style.height = '100vh';
+            container.style.zIndex = '9999';
+        } else {
+            container.style.position = '';
+            container.style.top = '';
+            container.style.left = '';
+            container.style.width = '';
+            container.style.height = '';
+            container.style.zIndex = '';
+        }
+    });
     
     // Allow links to open in new tabs
     var iframe = document.getElementsByClassName('cesium-infoBox-iframe')[0];
@@ -62,6 +83,15 @@ export function updateMarker(entityId, lat, lon) {
     const entity = viewer.entities.getById(entityId);
     if (entity) {
         entity.position = Cesium.Cartesian3.fromDegrees(lon, lat);
+    }
+}
+
+export function updateMarkerDescription(entityId, description) {
+    if (!viewer) return;
+    
+    const entity = viewer.entities.getById(entityId);
+    if (entity) {
+        entity.description = description;
     }
 }
 
